@@ -82,8 +82,9 @@ bool SkyEffect::InitAll(ID3D11Device * device)
 	// ******************
 	// 创建顶点着色器
 	//
+	std::wstring effectPath = L"..\\..\\Include\\HLSL\\";
 
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\Sky_VS.cso", L"..\\..\\Include\\HLSL\\Sky_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"Sky_VS.cso").c_str(), (effectPath + L"Sky_VS.hlsl").c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("Sky_VS", device, blob.Get()));
 	// 创建顶点布局
 	HR(device->CreateInputLayout(VertexPos::inputLayout, ARRAYSIZE(VertexPos::inputLayout),
@@ -92,7 +93,7 @@ bool SkyEffect::InitAll(ID3D11Device * device)
 	// ******************
 	// 创建像素着色器
 	//
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\Sky_PS.cso", L"..\\..\\Include\\HLSL\\Sky_PS.hlsl", "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"Sky_PS.cso").c_str(), (effectPath + L"Sky_PS.hlsl").c_str(), "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("Sky_PS", device, blob.Get()));
 
 	// ******************

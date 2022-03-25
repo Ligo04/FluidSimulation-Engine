@@ -56,23 +56,23 @@ float4 PS(VertexOutNormalMap pIn) : SV_Target
         spec += shadow[i] * S;
     }
         
-    [unroll]
-    for (i = 0; i < 5; ++i)
-    {
-        ComputePointLight(g_Material, g_PointLight[i], pIn.PosW, bumpedNormalW, toEyeW, A, D, S);
-        ambient += A;
-        diffuse += D;
-        spec += S;
-    }
+    //[unroll]
+    //for (i = 0; i < 5; ++i)
+    //{
+    //    ComputePointLight(g_Material, g_PointLight[i], pIn.PosW, bumpedNormalW, toEyeW, A, D, S);
+    //    ambient += A;
+    //    diffuse += D;
+    //    spec += S;
+    //}
 
-    [unroll]
-    for (i = 0; i < 5; ++i)
-    {
-        ComputeSpotLight(g_Material, g_SpotLight[i], pIn.PosW, bumpedNormalW, toEyeW, A, D, S);
-        ambient += A;
-        diffuse += D;
-        spec += S;
-    }
+    //[unroll]
+    //for (i = 0; i < 5; ++i)
+    //{
+    //    ComputeSpotLight(g_Material, g_SpotLight[i], pIn.PosW, bumpedNormalW, toEyeW, A, D, S);
+    //    ambient += A;
+    //    diffuse += D;
+    //    spec += S;
+    //}
   
     float4 litColor = texColor * (ambient + diffuse) + spec;
     litColor.a = texColor.a * g_Material.Diffuse.a;

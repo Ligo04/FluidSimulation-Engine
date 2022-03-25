@@ -27,6 +27,16 @@ float Camera::GetRotationY() const
 	return m_Transform.GetRotation().y;
 }
 
+float Camera::GetFovy() const
+{
+	return m_FovY;
+}
+
+float Camera::GetAspect() const
+{
+	return m_Aspect;
+}
+
 
 XMVECTOR Camera::GetRightAxisXM() const
 {

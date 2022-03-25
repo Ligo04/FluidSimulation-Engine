@@ -4,7 +4,6 @@
 #include <cstring>
 #include <DirectXMath.h>
 
-
 // 方向光
 struct DirectionalLight
 {
@@ -26,6 +25,26 @@ struct DirectionalLight
 	DirectX::XMFLOAT3 direction;
 	float pad; // 最后用一个浮点数填充使得该结构体大小满足16的倍数，便于我们以后在HLSL设置数组
 };
+
+//// 方向光
+//struct DirectionalLight
+//{
+//	DirectionalLight() = default;
+//
+//	DirectionalLight(const DirectionalLight&) = default;
+//	DirectionalLight& operator=(const DirectionalLight&) = default;
+//
+//	DirectionalLight(DirectionalLight&&) = default;
+//	DirectionalLight& operator=(DirectionalLight&&) = default;
+//
+//	DirectionalLight(const DirectX::XMFLOAT4& _Color, const DirectX::XMFLOAT3& _direction,float _idensity):
+//		Color(_Color), Direction(_direction),Idensity(_idensity) {}
+//
+//
+//	DirectX::XMFLOAT4 Color;
+//	DirectX::XMFLOAT3 Direction;
+//	float Idensity;
+//};
 
 // 点光
 struct PointLight
@@ -69,7 +88,7 @@ struct SpotLight
 	SpotLight(const DirectX::XMFLOAT4& _ambient, const DirectX::XMFLOAT4& _diffuse, const DirectX::XMFLOAT4& _specular,
 		const DirectX::XMFLOAT3& _position, float _range, const DirectX::XMFLOAT3& _direction,
 		float _spot, const DirectX::XMFLOAT3& _att) :
-		ambient(_ambient), diffuse(_diffuse), specular(_specular), 
+		ambient(_ambient), diffuse(_diffuse), specular(_specular),
 		position(_position), range(_range), direction(_direction), spot(_spot), att(_att), pad() {}
 
 	DirectX::XMFLOAT4 ambient;
@@ -88,6 +107,7 @@ struct SpotLight
 	DirectX::XMFLOAT3 att;
 	float pad; // 最后用一个浮点数填充使得该结构体大小满足16的倍数，便于我们以后在HLSL设置数组
 };
+
 
 // 物体表面材质
 struct Material

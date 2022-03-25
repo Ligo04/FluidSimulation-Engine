@@ -477,4 +477,102 @@ private:
 	std::unique_ptr<Impl> pImpl;
 };
 
+class PointSpriteEffect :public IEffect,public IEffectTransform
+{
+public:
+	PointSpriteEffect();
+	virtual ~PointSpriteEffect() override;
+
+
+	PointSpriteEffect(PointSpriteEffect&& moveFrom) noexcept;
+	PointSpriteEffect& operator=(PointSpriteEffect&& moveFrom) noexcept;
+
+	//初始化资源
+	bool Init(ID3D11Device* device, const std::wstring& effectPath);
+
+	//深度贴图
+	void SetPointSpriteDepth(ID3D11DeviceContext* deviceContext);
+
+	void SetPointSpriteRender(ID3D11DeviceContext* deviceContext);
+
+	void SetDepthStencilState(ID3D11DepthStencilState* depthStenState, UINT stencileValue);
+	void SetRasterizerState(ID3D11RasterizerState* rsState);
+
+	void SetDirLight(size_t pos, const DirectionalLight& dirLight);
+
+	//
+	// IEffectTransform
+	//
+	void XM_CALLCONV SetWorldMatrix(DirectX::FXMMATRIX W);
+	void XM_CALLCONV SetViewMatrix(DirectX::FXMMATRIX V);
+	void XM_CALLCONV SetProjMatrix(DirectX::FXMMATRIX P);
+
+	// 设置摄像机位置
+	void SetEyePos(const DirectX::XMFLOAT3& eyePos);
+
+	void SetPointColor(const DirectX::XMFLOAT4& color);
+	void SetPointRadius(float radius);
+	void SetPointScale(float scale);
+
+
+	void SetDebugObjectName(const std::string& name);
+
+	// 
+	// IEffect
+	//
+
+	// 应用常量缓冲区和纹理资源的变更
+	void Apply(ID3D11DeviceContext* deviceContext) override;
+private:
+	class Impl;
+	std::unique_ptr<Impl> m_pImpl;
+};
+
+
+
+class NeighborSearchEffect :public IEffect
+{
+public:
+	NeighborSearchEffect();
+	virtual ~NeighborSearchEffect() override;
+
+
+	NeighborSearchEffect(NeighborSearchEffect&& moveFrom) noexcept;
+	NeighborSearchEffect& operator=(NeighborSearchEffect&& moveFrom) noexcept;
+
+	//初始化资源
+	bool Init(ID3D11Device* device, const std::wstring& effectPath);
+
+	void SetCalcHashState();
+	void SetRadixSortCountState();
+	void SetRadixSortCountPrefixState();
+	void SetRadixSortDispatchState();
+	void SetInputSRVByName(LPCSTR name, ID3D11ShaderResourceView* srv);
+	void SetOutPutUAVByName(LPCSTR name, ID3D11UnorderedAccessView*  uav);
+
+
+	void SetCellFactor(float factor);
+	void SetParticleNums(UINT particleNum);
+	void SetCurrIteration(int currIteration);
+	void SetCounterNums(UINT counterNum);
+	void SetKeyNums(UINT keyNums);
+	void SetBlocksNums(UINT blocksNums);
+	void SetDebugObjectName(const std::string& name);
+
+
+
+	// 
+	// IEffect
+	//
+
+	// 应用常量缓冲区和纹理资源的变更
+	void Apply(ID3D11DeviceContext* deviceContext) override;
+private:
+	class Impl;
+	std::unique_ptr<Impl> m_pImpl;
+};
+
+
+
+
 #endif

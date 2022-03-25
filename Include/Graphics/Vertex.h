@@ -102,7 +102,6 @@ struct VertexPosNormalColor
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[3];
 };
 
-
 struct VertexPosNormalTex
 {
 	VertexPosNormalTex() = default;
@@ -144,23 +143,25 @@ struct VertexPosNormalTangentTex
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[4];
 };
 
-struct VertexParticle
+struct PointVertexIn
 {
-	VertexParticle() = default;
+	PointVertexIn() = default;
 
-	VertexParticle(const VertexParticle&) = default;
-	VertexParticle& operator=(const VertexParticle&) = default;
+	PointVertexIn(const PointVertexIn&) = default;
+	PointVertexIn& operator=(const PointVertexIn&) = default;
 
-	VertexParticle(VertexParticle&&) = default;
-	VertexParticle& operator=(VertexParticle&&) = default;
+	PointVertexIn(PointVertexIn&&) = default;
+	PointVertexIn& operator=(PointVertexIn&&) = default;
 
-	DirectX::XMFLOAT3 initialPos;
-	DirectX::XMFLOAT3 initialVel;
-	DirectX::XMFLOAT2 size;
-	float age;
-	unsigned type;
+	constexpr PointVertexIn(const DirectX::XMFLOAT3& _pos, const float& _den) :
+		pos(_pos), density{ _den }{}
 
-	static const D3D11_INPUT_ELEMENT_DESC inputLayout[5];
+
+	DirectX::XMFLOAT3  pos;
+	float density;
+
+	static const D3D11_INPUT_ELEMENT_DESC inputLayout[2];
 };
+
 
 #endif

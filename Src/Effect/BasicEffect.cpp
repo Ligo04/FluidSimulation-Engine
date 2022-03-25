@@ -82,6 +82,8 @@ bool BasicEffect::InitAll(ID3D11Device * device)
 
 	pImpl->m_pEffectHelper = std::make_unique<EffectHelper>();
 
+
+
 	ComPtr<ID3DBlob> blob;
 
 	// 实例输入布局
@@ -118,57 +120,58 @@ bool BasicEffect::InitAll(ID3D11Device * device)
 	// 创建顶点着色器
 	//
 
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\BasicInstance_VS.cso", L"..\\..\\Include\\HLSL\\BasicInstance_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+	std::wstring effectPath = L"..\\..\\Include\\HLSL\\";
+
+	HR(CreateShaderFromFile((effectPath+ L"BasicInstance_VS.cso").c_str(), (effectPath + L"BasicInstance_VS.hlsl").c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("BasicInstance_VS", device, blob.Get()));
 	// 创建顶点布局
 	HR(device->CreateInputLayout(basicInstLayout, ARRAYSIZE(basicInstLayout),
 		blob->GetBufferPointer(), blob->GetBufferSize(), pImpl->m_pInstancePosNormalTexLayout.GetAddressOf()));
 
-
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\BasicObject_VS.cso", L"..\\..\\Include\\HLSL\\BasicObject_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"BasicObject_VS.cso").c_str(), (effectPath + L"BasicObject_VS.hlsl").c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("BasicObject_VS", device, blob.Get()));
 	// 创建顶点布局
 	HR(device->CreateInputLayout(VertexPosNormalTex::inputLayout, ARRAYSIZE(VertexPosNormalTex::inputLayout),
 		blob->GetBufferPointer(), blob->GetBufferSize(), pImpl->m_pVertexPosNormalTexLayout.GetAddressOf()));
 
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\NormalMapInstance_VS.cso", L"..\\..\\Include\\HLSL\\NormalMapInstance_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"NormalMapInstance_VS.cso").c_str(), (effectPath + L"NormalMapInstance_VS.hlsl").c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("NormalMapInstance_VS", device, blob.Get()));
 	// 创建顶点布局
 	HR(device->CreateInputLayout(normalmapInstLayout, ARRAYSIZE(normalmapInstLayout),
 		blob->GetBufferPointer(), blob->GetBufferSize(), pImpl->m_pInstancePosNormalTangentTexLayout.GetAddressOf()));
 	
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\NormalMapObject_VS.cso", L"..\\..\\Include\\HLSL\\NormalMapObject_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"NormalMapObject_VS.cso").c_str(), (effectPath + L"NormalMapObject_VS.hlsl").c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("NormalMapObject_VS", device, blob.Get()));
 	// 创建顶点布局
 	HR(device->CreateInputLayout(VertexPosNormalTangentTex::inputLayout, ARRAYSIZE(VertexPosNormalTangentTex::inputLayout),
 		blob->GetBufferPointer(), blob->GetBufferSize(), pImpl->m_pVertexPosNormalTangentTexLayout.GetAddressOf()));
 
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\DisplacementMapObject_VS.cso", L"..\\..\\Include\\HLSL\\DisplacementMapObject_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"DisplacementMapObject_VS.cso").c_str(), (effectPath + L"DisplacementMapObject_VS.hlsl").c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("DisplacementMapObject_VS", device, blob.Get()));
 
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\DisplacementMapInstance_VS.cso", L"..\\..\\Include\\HLSL\\DisplacementMapInstance_VS.hlsl", "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"DisplacementMapInstance_VS.cso").c_str(), (effectPath + L"DisplacementMapInstance_VS.hlsl").c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("DisplacementMapInstance_VS", device, blob.Get()));
 
 	// ******************
 	// 创建外壳着色器
 	//
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\DisplacementMap_HS.cso", L"..\\..\\Include\\HLSL\\DisplacementMap_HS.hlsl", "HS", "hs_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"DisplacementMap_HS.cso").c_str(), (effectPath + L"DisplacementMap_HS.hlsl").c_str(), "HS", "hs_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("DisplacementMap_HS", device, blob.Get()));
 
 	// ******************
 	// 创建域着色器
 	//
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\DisplacementMap_DS.cso", L"..\\..\\Include\\HLSL\\DisplacementMap_DS.hlsl", "DS", "ds_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"DisplacementMap_DS.cso").c_str(), (effectPath + L"DisplacementMap_DS.cso").c_str(), "DS", "ds_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("DisplacementMap_DS", device, blob.Get()));
 
 	// ******************
 	// 创建像素着色器
 	//
 	
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\Basic_PS.cso", L"..\\..\\Include\\HLSL\\Basic_PS.hlsl", "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"Basic_PS.cso").c_str(), (effectPath + L"Basic_PS.hlsl").c_str(), "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("Basic_PS", device, blob.Get()));
 
-	HR(CreateShaderFromFile(L"..\\..\\Include\\HLSL\\NormalMap_PS.cso", L"..\\..\\Include\\HLSL\\NormalMap_PS.hlsl", "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
+	HR(CreateShaderFromFile((effectPath + L"NormalMap_PS.cso").c_str(), (effectPath + L"NormalMap_PS.hlsl").c_str(), "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
 	HR(pImpl->m_pEffectHelper->AddShader("NormalMap_PS", device, blob.Get()));
 
 	// ******************

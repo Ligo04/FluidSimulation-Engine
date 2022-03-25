@@ -15,6 +15,7 @@ VertexOutBasic VS(InstancePosNormalTex vIn)
     
     // 从NDC坐标[-1, 1]^2变换到纹理空间坐标[0, 1]^2
     // u = 0.5x + 0.5
+
     // v = -0.5y + 0.5
     // ((xw, yw, zw, w) + (w, w, 0, 0)) * (0.5, -0.5, 1, 1) = ((0.5x + 0.5)w, (-0.5y + 0.5)w, zw, w)
     //                                                      = (uw, vw, zw, w)

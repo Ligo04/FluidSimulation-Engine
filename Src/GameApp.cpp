@@ -9,15 +9,14 @@ using namespace DirectX;
 
 #pragma warning(disable: 26812)
 
-GameApp::GameApp(HINSTANCE hInstance)
-	: D3DApp(hInstance), 
+GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
+	: D3DApp(hInstance, windowName, initWidth, initHeight),
 	m_pBasicEffect(std::make_unique<BasicEffect>()),
-	m_pFireEffect(std::make_unique<ParticleEffect>()),
-	m_pRainEffect(std::make_unique<ParticleEffect>()),
 	m_pSkyEffect(std::make_unique<SkyEffect>()),
-	m_pFire(std::make_unique<ParticleRender>()),
-	m_pRain(std::make_unique<ParticleRender>())
+	m_pFluidSystem(std::make_unique<FluidSystem>()),
+	m_DirLight()
 {
+	
 }
 
 GameApp::~GameApp()
@@ -38,72 +37,21 @@ bool GameApp::Init()
 	if (!m_pSkyEffect->InitAll(m_pd3dDevice.Get()))
 		return false;
 
-	if (!m_pFireEffect->Init(m_pd3dDevice.Get(), L"..\\..\\Include\\HLSL\\Fire"))
-		return false;
-
-	if (!m_pRainEffect->Init(m_pd3dDevice.Get(), L"..\\..\\Include\\HLSL\\Rain"))
+	if (!m_pFluidSystem->InitEffect(m_pd3dDevice.Get()))
 		return false;
 
 	if (!InitResource())
 		return false;
 
-	// 初始化鼠标，键盘不需要
-	m_pMouse->SetWindow(m_hMainWnd);
-	m_pMouse->SetMode(DirectX::Mouse::MODE_ABSOLUTE);
-
-	//******************
-    //IMGUI
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	ImGui_ImplWin32_Init(m_hMainWnd);
-	ImGui_ImplDX11_Init(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get());
 
 	return true;
 }
 
 void GameApp::OnResize()
 {
-	assert(m_pd2dFactory);
-	assert(m_pdwriteFactory);
-	// 释放D2D的相关资源
-	m_pColorBrush.Reset();
-	m_pd2dRenderTarget.Reset();
 
 	D3DApp::OnResize();
 
-	// 为D2D创建DXGI表面渲染目标
-	ComPtr<IDXGISurface> surface;
-	HR(m_pSwapChain->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<void**>(surface.GetAddressOf())));
-	D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
-		D2D1_RENDER_TARGET_TYPE_DEFAULT,
-		D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED));
-	HRESULT hr = m_pd2dFactory->CreateDxgiSurfaceRenderTarget(surface.Get(), &props, m_pd2dRenderTarget.GetAddressOf());
-	surface.Reset();
-
-	if (hr == E_NOINTERFACE)
-	{
-		OutputDebugStringW(L"\n警告：Direct2D与Direct3D互操作性功能受限，你将无法看到文本信息。现提供下述可选方法：\n"
-			L"1. 对于Win7系统，需要更新至Win7 SP1，并安装KB2670838补丁以支持Direct2D显示。\n"
-			L"2. 自行完成Direct3D 10.1与Direct2D的交互。详情参阅："
-			L"https://docs.microsoft.com/zh-cn/windows/desktop/Direct2D/direct2d-and-direct3d-interoperation-overview""\n"
-			L"3. 使用别的字体库，比如FreeType。\n\n");
-	}
-	else if (hr == S_OK)
-	{
-		// 创建固定颜色刷和文本格式
-		HR(m_pd2dRenderTarget->CreateSolidColorBrush(
-			D2D1::ColorF(D2D1::ColorF::White),
-			m_pColorBrush.GetAddressOf()));
-		HR(m_pdwriteFactory->CreateTextFormat(L"宋体", nullptr, DWRITE_FONT_WEIGHT_NORMAL,
-			DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 15, L"zh-cn",
-			m_pTextFormat.GetAddressOf()));
-	}
-	else
-	{
-		// 报告异常问题
-		assert(m_pd2dRenderTarget);
-	}
 
 	// 摄像机变更显示
 	if (m_pCamera != nullptr)
@@ -116,76 +64,15 @@ void GameApp::OnResize()
 
 void GameApp::UpdateScene(float dt)
 {
-
-	// 更新鼠标事件，获取相对偏移量
-	Mouse::State mouseState = m_pMouse->GetState();
-	Mouse::State lastMouseState = m_MouseTracker.GetLastState();
-	m_MouseTracker.Update(mouseState);
-
-	Keyboard::State keyState = m_pKeyboard->GetState();
-	m_KeyboardTracker.Update(keyState);
-
-	auto cam1st = std::dynamic_pointer_cast<FirstPersonCamera>(m_pCamera);
-		
 	// ******************
-	// 自由摄像机的操作
+	// 更新摄像机
 	//
-
-	// 方向移动
-	if (keyState.IsKeyDown(Keyboard::W))
-		cam1st->Walk(dt * 6.0f);
-	if (keyState.IsKeyDown(Keyboard::S))
-		cam1st->Walk(dt * -6.0f);
-	if (keyState.IsKeyDown(Keyboard::A))
-		cam1st->Strafe(dt * -6.0f);
-	if (keyState.IsKeyDown(Keyboard::D))
-		cam1st->Strafe(dt * 6.0f);
-
-	// 在鼠标没进入窗口前仍为ABSOLUTE模式
-	if (mouseState.positionMode == Mouse::MODE_RELATIVE)
-	{
-		cam1st->Pitch(mouseState.y * dt * 1.25f);
-		cam1st->RotateY(mouseState.x * dt * 1.25f);
-	}
-
-	// 将位置限制在[-80.0f, 80.0f]的区域内
-	// 不允许穿地
-	XMFLOAT3 adjustedPos;
-	XMStoreFloat3(&adjustedPos, XMVectorClamp(cam1st->GetPositionXM(), XMVectorReplicate(-80.0f), XMVectorReplicate(80.0f)));
-	cam1st->SetPosition(adjustedPos);
+	m_FPSCameraController.Update(dt);
 
 	m_pBasicEffect->SetViewMatrix(m_pCamera->GetViewXM());
 	m_pBasicEffect->SetEyePos(m_pCamera->GetPosition());
 
-	// ******************
-	// 粒子系统
-	//
-	if (m_KeyboardTracker.IsKeyPressed(Keyboard::R))
-	{
-		m_pFire->Reset();
-		m_pRain->Reset();
-	}
-	m_pFire->Update(dt, m_Timer.TotalTime());
-	m_pRain->Update(dt, m_Timer.TotalTime());
-
-	m_pFireEffect->SetViewProjMatrix(m_pCamera->GetViewProjXM());
-	m_pFireEffect->SetEyePos(m_pCamera->GetPosition());
-
-	static XMFLOAT3 lastCameraPos = m_pCamera->GetPosition();
-	XMFLOAT3 cameraPos = m_pCamera->GetPosition();
-
-	XMVECTOR cameraPosVec = XMLoadFloat3(&cameraPos);
-	XMVECTOR lastCameraPosVec = XMLoadFloat3(&lastCameraPos);
-	XMFLOAT3 emitPos;
-	XMStoreFloat3(&emitPos, cameraPosVec + 3.0f * (cameraPosVec - lastCameraPosVec));
-	m_pRainEffect->SetViewProjMatrix(m_pCamera->GetViewProjXM());
-	m_pRainEffect->SetEyePos(m_pCamera->GetPosition());
-	m_pRain->SetEmitPos(emitPos);
-	lastCameraPos = m_pCamera->GetPosition();
-
-	// 退出程序，这里应向窗口发送销毁信息
-	if (m_KeyboardTracker.IsKeyPressed(Keyboard::Escape))
-		SendMessage(MainWnd(), WM_DESTROY, 0, 0);
+	UpdateFluidSystem(dt);
 }
 
 void GameApp::DrawScene()
@@ -195,57 +82,48 @@ void GameApp::DrawScene()
 
 	m_pd3dImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), reinterpret_cast<const float*>(&Colors::Silver));
 	m_pd3dImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	
 
 	// ******************
 	// 正常绘制场景
 	//
 
-	// 绘制地面
+	//绘制墙体
 	m_pBasicEffect->SetRenderDefault(m_pd3dImmediateContext.Get(), BasicEffect::RenderObject);
-	m_Ground.Draw(m_pd3dImmediateContext.Get(), m_pBasicEffect.get());
+	for (size_t i = 0; i < m_Walls.size(); ++i)
+	{
+		m_Walls[i].Draw(m_pd3dImmediateContext.Get(), m_pBasicEffect.get());
+	}
+
+	DrawSceneWithFluid();
+
 
 	// 绘制天空盒
 	m_pSkyEffect->SetRenderDefault(m_pd3dImmediateContext.Get());
-	m_pGrassCube->Draw(m_pd3dImmediateContext.Get(), *m_pSkyEffect, *m_pCamera);
+	m_pLakeCube->Draw(m_pd3dImmediateContext.Get(), *m_pSkyEffect, *m_pCamera);
 
-	// ******************
-	// 粒子系统留在最后绘制
-	//
-
-	m_pFire->Draw(m_pd3dImmediateContext.Get(), *m_pFireEffect, *m_pCamera);
-	m_pRain->Draw(m_pd3dImmediateContext.Get(), *m_pRainEffect, *m_pCamera);
-
-
-
-	// ******************
-	// 绘制Direct2D部分
-	//
-	if (m_pd2dRenderTarget != nullptr)
-	{
-		m_pd2dRenderTarget->BeginDraw();
-		std::wstring text = L"当前摄像机模式: 第一人称  Esc退出\nR-重置粒子系统";
-		
-		m_pd2dRenderTarget->DrawTextW(text.c_str(), (UINT32)text.length(), m_pTextFormat.Get(),
-			D2D1_RECT_F{ 0.0f, 0.0f, 600.0f, 200.0f }, m_pColorBrush.Get());
-		HR(m_pd2dRenderTarget->EndDraw());
-	}
-
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	HR(m_pSwapChain->Present(0, 0));
 }
 
 bool GameApp::InitResource()
 {
+
 	// ******************
-	// 初始化摄像机
-	//
+    // 初始化摄像机和控制器
+    //
 
 	auto camera = std::shared_ptr<FirstPersonCamera>(new FirstPersonCamera);
 	m_pCamera = camera;
 
 	camera->SetViewPort(0.0f, 0.0f, (float)m_ClientWidth, (float)m_ClientHeight);
+	// 注意：反转Z时需要将近/远平面对调
 	camera->SetFrustum(XM_PI / 3, AspectRatio(), 1.0f, 1000.0f);
-	camera->LookTo(XMFLOAT3(0.0f, 0.0f, -10.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	camera->LookTo(XMFLOAT3(0.0f, 2.0f, -10.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
+	m_FPSCameraController.InitCamera(camera.get());
+	m_FPSCameraController.SetMoveSpeed(10.0f);
+	m_FPSCameraController.SetStrafeSpeed(10.0f);
 	// ******************
 	// 初始化特效
 	//
@@ -256,85 +134,149 @@ bool GameApp::InitResource()
 	m_pBasicEffect->SetViewMatrix(camera->GetViewXM());
 	m_pBasicEffect->SetProjMatrix(camera->GetProjXM());
 
-	m_pFireEffect->SetBlendState(RenderStates::BSAlphaWeightedAdditive.Get(), nullptr, 0xFFFFFFFF);
-	m_pFireEffect->SetDepthStencilState(RenderStates::DSSNoDepthWrite.Get(), 0);
-
-	m_pRainEffect->SetDepthStencilState(RenderStates::DSSNoDepthWrite.Get(), 0);
 
 	// ******************
 	// 初始化对象
 	//
+	std::wstring modelPath = L"..\\..\\Assets\\Model\\";
+	std::wstring texturePath= L"..\\..\\Assets\\Texture\\";
 
 
-	// 初始化地面
-	m_ObjReader.Read(L"..\\..\\Assets\\Model\\ground_35.mbo", L"..\\..\\Assets\\Model\\ground_35.obj");
-	m_Ground.SetModel(Model(m_pd3dDevice.Get(), m_ObjReader));
 
-	// ******************
-	// 初始化粒子系统
-	//
-	ComPtr<ID3D11ShaderResourceView> pFlareSRV, pRainSRV, pRandomSRV;
-	HR(CreateTexture2DArrayFromFile(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(),
-		std::vector<std::wstring>{ L"..\\..\\Assets\\Texture\\flare0.dds" }, nullptr, pFlareSRV.GetAddressOf()));
-	HR(CreateRandomTexture1D(m_pd3dDevice.Get(), nullptr, pRandomSRV.GetAddressOf()));
-	m_pFire->Init(m_pd3dDevice.Get(), 500);
-	m_pFire->SetTextureArraySRV(pFlareSRV.Get());
-	m_pFire->SetRandomTexSRV(pRandomSRV.Get());
-	m_pFire->SetEmitPos(XMFLOAT3(0.0f, -1.0f, 0.0f));
-	m_pFire->SetEmitDir(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	m_pFire->SetEmitInterval(0.005f);
-	m_pFire->SetAliveTime(1.0f);
-	
 
-	HR(CreateTexture2DArrayFromFile(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(),
-		std::vector<std::wstring>{ L"..\\..\\Assets\\Texture\\raindrop.dds" }, nullptr, pRainSRV.GetAddressOf()));
-	HR(CreateRandomTexture1D(m_pd3dDevice.Get(), nullptr, pRandomSRV.ReleaseAndGetAddressOf()));
-	m_pRain->Init(m_pd3dDevice.Get(), 10000);
-	m_pRain->SetTextureArraySRV(pRainSRV.Get());
-	m_pRain->SetRandomTexSRV(pRandomSRV.Get());
-	m_pRain->SetEmitDir(XMFLOAT3(0.0f, -1.0f, 0.0f));
-	m_pRain->SetEmitInterval(0.0015f);
-	m_pRain->SetAliveTime(3.0f);
 
 	// ******************
 	// 初始化天空盒相关
 	//
-	m_pGrassCube = std::make_unique<SkyRender>();
-	HR(m_pGrassCube->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(),
-		L"..\\..\\Assets\\Texture\\grasscube1024.dds", 5000.0f));
+	m_pLakeCube = std::make_unique<SkyRender>();
+	HR(m_pLakeCube->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(),
+		std::vector<std::wstring>{
+		(texturePath + L"lake\\right.jpg").c_str(), (texturePath + L"lake\\left.jpg").c_str(),
+		(texturePath + L"lake\\top.jpg").c_str(), (texturePath + L"lake\\bottom.jpg").c_str(),
+		(texturePath + L"lake\\front.jpg").c_str(), (texturePath + L"lake\\back.jpg").c_str(), },
+		5000.0f));
 
-	m_pBasicEffect->SetTextureCube(m_pGrassCube->GetTextureCube());
+	m_pBasicEffect->SetTextureCube(m_pLakeCube->GetTextureCube());
 
 	// ******************
 	// 初始化光照
 	//
-	// 方向光(默认)
-	DirectionalLight dirLight[4];
-	dirLight[0].ambient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
-	dirLight[0].diffuse = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
-	dirLight[0].specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	dirLight[0].direction = XMFLOAT3(-0.577f, -0.577f, 0.577f);
-	dirLight[1] = dirLight[0];
-	dirLight[1].direction = XMFLOAT3(0.577f, -0.577f, 0.577f);
-	dirLight[2] = dirLight[0];
-	dirLight[2].direction = XMFLOAT3(0.577f, -0.577f, -0.577f);
-	dirLight[3] = dirLight[0];
-	dirLight[3].direction = XMFLOAT3(-0.577f, -0.577f, -0.577f);
-	for (int i = 0; i < 4; ++i)
-		m_pBasicEffect->SetDirLight(i, dirLight[i]);
-		
+	DirectionalLight dirLight{};
+	dirLight.ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+	dirLight.diffuse = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
+	dirLight.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	dirLight.direction =   XMFLOAT3(5.0f, 0.0f, 0.0f);
+	m_DirLight = dirLight;
+	m_pBasicEffect->SetDirLight(0, m_DirLight);
 
+
+	//初始化墙
+	std::vector<Transform> wallsWorlds =
+	{
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,0.0f)},        //下面(地面)
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(-XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,5.0f)}, //前面
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,-5.0f)},    //后面
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,-XM_PI / 2.0f),XMFLOAT3(-5.0f,0.0f,0.0f)},  //左侧
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,XM_PI / 2.0f),XMFLOAT3(5.0f,0.0f,0.0f)},      //右侧
+	};
 
 	
+	m_Walls.resize(5);
+	//地面
+	Model model{};
+	model.SetMesh(m_pd3dDevice.Get(), Geometry::CreatePlane(XMFLOAT2(50.0f, 50.0f),XMFLOAT2(2.5f,2.5f)));
+	model.modelParts[0].material.ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	model.modelParts[0].material.diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	model.modelParts[0].material.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 8.0f);
+	model.modelParts[0].material.reflect = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	HR(CreateWICTextureFromFile(m_pd3dDevice.Get(), (texturePath + L"floor.png").c_str(), nullptr,
+		model.modelParts[0].texDiffuse.GetAddressOf()));
+	m_Walls[0].SetModel(std::move(model));
+	m_Walls[0].GetTransform().SetPosition(wallsWorlds[0].GetPosition());
+
+
+
+	//墙体
+	Model model1{};
+	XMFLOAT4 color{};
+	XMStoreFloat4(&color, DirectX::Colors::Blue);
+	model1.SetMesh(m_pd3dDevice.Get(), Geometry::CreatePlane(XMFLOAT2(50.0f, 50.0f), XMFLOAT2(2.0f, 2.0f), color));
+	model1.modelParts[0].material.ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	model1.modelParts[0].material.diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	model1.modelParts[0].material.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 8.0f);
+	model1.modelParts[0].material.reflect = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	HR(CreateWICTextureFromFile(m_pd3dDevice.Get(), (texturePath + L"floor.png").c_str(), nullptr,
+		model1.modelParts[0].texDiffuse.GetAddressOf()));
+
+	for (size_t i = 1; i < m_Walls.size(); ++i)
+	{
+		m_Walls[i].SetModel(model1);
+		m_Walls[i].GetTransform().SetPosition(wallsWorlds[i].GetPosition());
+		m_Walls[i].GetTransform().SetRotation(wallsWorlds[i].GetRotation());
+		m_Walls[i].GetTransform().SetScale(wallsWorlds[i].GetScale());
+	}
+
+
+
+	// ******************
+    // 初始化流体系统
+	//
+
+	XMMATRIX view = m_pCamera->GetViewXM();
+	PointSpriteRender::ParticleParams parmas{};
+	parmas.radius = 0.075f;			//世界空间的半径
+	float aspect = m_pCamera->GetAspect();
+	float fov = m_pCamera->GetFovy();
+	//计算出世界空间的长度投影到屏幕空间的长度
+	parmas.scale = float(m_ClientWidth) / aspect * (1.0f / tanf(fov * 0.5f));
+	parmas.color = DirectX::XMFLOAT4(0.0f, 0.5f, 1.0f,1.0f);
+
+	m_pFluidSystem->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(), parmas, dirLight,m_ClientWidth,m_ClientHeight);
+  
+
 	// ******************
 	// 设置调试对象名
 	//
-	m_Ground.SetDebugObjectName("Ground");
-	m_pGrassCube->SetDebugObjectName("GrassCube");
-	m_pFireEffect->SetDebugObjectName("FireEffect");
-	m_pRainEffect->SetDebugObjectName("RainEffect");
-	m_pFire->SetDebugObjectName("Fire");
-	m_pRain->SetDebugObjectName("Rain");
+	m_pLakeCube->SetDebugObjectName("LakeCube");
 
 	return true;
+}
+
+void GameApp::UpdateFluidSystem(float dt)
+{
+	if (ImGui::Begin("Fliud Simulation"))
+	{
+
+	}
+	ImGui::End();
+
+	//*******************
+	//流体系统更新
+	m_pFluidSystem->update(m_pd3dImmediateContext.Get(), dt, *m_pCamera);
+}
+
+void GameApp::DrawSceneWithFluid()
+{
+	//*******************
+	//最后绘制流体系统
+	//
+	if (ImGui::Begin("Depth Texture"))
+	{
+		ImVec2 winSize = ImGui::GetWindowSize();
+		float smaller = (std::min)((winSize.x - 20) / AspectRatio(), winSize.y - 36);
+		ImGui::Image(m_pFluidSystem->GetParticleDepthSRV(m_pd3dImmediateContext.Get()), ImVec2(smaller * AspectRatio(), smaller));
+	}
+
+	//恢复原来输出合并状态
+	m_pd3dImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
+
+
+
+	m_pFluidSystem->DrawParticle(m_pd3dImmediateContext.Get());
+	m_pFluidSystem->CalcHash(m_pd3dImmediateContext.Get());
+	m_pFluidSystem->BeginRadix(m_pd3dImmediateContext.Get());
+
+	ImGui::End();
+
+	ImGui::Render();
 }

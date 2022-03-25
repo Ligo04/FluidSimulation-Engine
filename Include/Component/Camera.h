@@ -36,6 +36,12 @@ public:
 	// 获取绕Y轴旋转的欧拉角弧度
 	float GetRotationY() const;
 
+	// 获取fovy(垂直视场角)
+	float GetFovy() const;
+	// 获取宽高比
+	float GetAspect() const;
+
+
 	//
 	// 获取摄像机的坐标轴向量
 	//

@@ -408,4 +408,59 @@ inline DirectX::XMMATRIX XM_CALLCONV InverseTranspose(DirectX::FXMMATRIX M)
 	return XMMatrixTranspose(XMMatrixInverse(nullptr, A));
 }
 
+
+//
+// 数学相关函数
+//
+
+namespace XMath
+{
+	// ------------------------------
+	// InverseTranspose函数
+	// ------------------------------
+	inline DirectX::XMMATRIX XM_CALLCONV InverseTranspose(DirectX::FXMMATRIX M)
+	{
+		using namespace DirectX;
+
+		// 世界矩阵的逆的转置仅针对法向量，我们也不需要世界矩阵的平移分量
+		// 而且不去掉的话，后续再乘上观察矩阵之类的就会产生错误的变换结果
+		XMMATRIX A = M;
+		A.r[3] = g_XMIdentityR3;
+
+		return XMMatrixTranspose(XMMatrixInverse(nullptr, A));
+	}
+
+	inline float Lerp(float a, float b, float t)
+	{
+		return a + (b - a) * t;
+	}
+
+	inline float Clamp(float val, float minVal, float maxVal)
+	{
+		return (std::min)((std::max)(val, minVal), maxVal);
+	}
+}
+
+
+//一些其他函数
+template <typename T>
+int high_bit(T x)
+{
+	auto ux = std::make_unsigned_t<T>(x);
+	int lb = -1, rb = std::numeric_limits<decltype(ux)>::digits;
+	while (lb + 1 < rb)
+	{
+		int mid = (lb + rb) / 2;
+		if (ux >> mid)
+		{
+			lb = mid;
+		}
+		else
+		{
+			rb = mid;
+		}
+	}
+	return lb;
+}
+
 #endif

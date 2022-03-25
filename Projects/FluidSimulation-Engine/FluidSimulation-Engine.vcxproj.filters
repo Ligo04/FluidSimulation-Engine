@@ -33,17 +33,26 @@
     <Filter Include="Include\Graphics">
       <UniqueIdentifier>{62c384e5-8c74-40d2-b1be-8e4c51fb4f39}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Include\Hierarchy">
-      <UniqueIdentifier>{e250556e-dbd1-45a2-a083-c71800e01f71}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Include\Utils">
       <UniqueIdentifier>{e6ac5681-91f3-4e57-94cd-4c550ff4daa1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Include\HLSL">
       <UniqueIdentifier>{bcbf6bbd-3ad6-44c4-b8db-ab52c4c4b1c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Include\Imgui">
+    <Filter Include="Src\Imgui">
       <UniqueIdentifier>{27fd3a12-de40-48ee-9434-112272060523}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Hierarchy">
+      <UniqueIdentifier>{e250556e-dbd1-45a2-a083-c71800e01f71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\HLSL\BasicEffect">
+      <UniqueIdentifier>{cbc5908c-fa69-4fad-af05-68b162331f57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\HLSL\FluidEffect">
+      <UniqueIdentifier>{2b20643d-507b-489a-8112-9f05514c1537}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\HLSL\SkyEffect">
+      <UniqueIdentifier>{a62c664c-99c4-4a43-be0e-b832d790c437}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -57,12 +66,6 @@
       <Filter>Src\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\Effect\EffectHelper.cpp">
-      <Filter>Src\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Src\Effect\ParticleEffect.cpp">
-      <Filter>Src\Effect</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Src\Effect\ParticleRender.cpp">
       <Filter>Src\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\Effect\SkyEffect.cpp">
@@ -123,25 +126,46 @@
       <Filter>Src\Utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ThirdParty\Imgui\src\imgui.cpp">
-      <Filter>Include\Imgui</Filter>
+      <Filter>Src\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ThirdParty\Imgui\src\imgui_demo.cpp">
-      <Filter>Include\Imgui</Filter>
+      <Filter>Src\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ThirdParty\Imgui\src\imgui_draw.cpp">
-      <Filter>Include\Imgui</Filter>
+      <Filter>Src\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ThirdParty\Imgui\src\imgui_impl_dx11.cpp">
-      <Filter>Include\Imgui</Filter>
+      <Filter>Src\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ThirdParty\Imgui\src\imgui_impl_win32.cpp">
-      <Filter>Include\Imgui</Filter>
+      <Filter>Src\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ThirdParty\Imgui\src\imgui_tables.cpp">
-      <Filter>Include\Imgui</Filter>
+      <Filter>Src\Imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ThirdParty\Imgui\src\imgui_widgets.cpp">
-      <Filter>Include\Imgui</Filter>
+      <Filter>Src\Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Effect\PointSpriteRender.cpp">
+      <Filter>Src\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Hierarchy\FluidSystem.cpp">
+      <Filter>Src\Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Effect\PointSpriteEffect.cpp">
+      <Filter>Src\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Hierarchy\CameraController.cpp">
+      <Filter>Src\Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Graphics\Texture2D.cpp">
+      <Filter>Src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Effect\NeighborSearchEffect.cpp">
+      <Filter>Src\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Effect\NeighborSearch.cpp">
+      <Filter>Src\Effect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -161,9 +185,6 @@
       <Filter>Include\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\Effect\Effects.h">
-      <Filter>Include\Effect</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\Effect\ParticleRender.h">
       <Filter>Include\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\Effect\SkyRender.h">
@@ -217,90 +238,99 @@
     <ClInclude Include="..\..\Include\Utils\DXTrace.h">
       <Filter>Include\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\Effect\PointSpriteRender.h">
+      <Filter>Include\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Hierarchy\FluidSystem.h">
+      <Filter>Include\Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Hierarchy\CameraController.h">
+      <Filter>Include\Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Graphics\Texture2D.h">
+      <Filter>Include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Effect\NeighborSearch.h">
+      <Filter>Include\Effect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Include\HLSL\Basic.hlsli">
-      <Filter>Include\HLSL</Filter>
+    <None Include="..\..\Include\HLSL\Fluid\FliudCommon.hlsli">
+      <Filter>Include\HLSL\FluidEffect</Filter>
     </None>
-    <None Include="..\..\Include\HLSL\Fire.hlsli">
-      <Filter>Include\HLSL</Filter>
+    <None Include="..\..\Include\HLSL\Basic.hlsli">
+      <Filter>Include\HLSL\BasicEffect</Filter>
     </None>
     <None Include="..\..\Include\HLSL\LightHelper.hlsli">
-      <Filter>Include\HLSL</Filter>
-    </None>
-    <None Include="..\..\Include\HLSL\Rain.hlsli">
-      <Filter>Include\HLSL</Filter>
+      <Filter>Include\HLSL\BasicEffect</Filter>
     </None>
     <None Include="..\..\Include\HLSL\Sky.hlsli">
-      <Filter>Include\HLSL</Filter>
+      <Filter>Include\HLSL\SkyEffect</Filter>
+    </None>
+    <None Include="..\..\Include\HLSL\Fluid\NerghborSearchCommon.hlsli">
+      <Filter>Include\HLSL\FluidEffect</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\..\Include\HLSL\Basic_PS.hlsl">
-      <Filter>Include\HLSL</Filter>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_GS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\BasicInstance_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSpriteDepth_PS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\BasicObject_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\DisplacementMap_DS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\DisplacementMap_HS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\DisplacementMapInstance_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\DisplacementMapObject_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fire_GS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fire_PS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fire_SO_GS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fire_SO_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fire_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\NormalMap_PS.hlsl">
-      <Filter>Include\HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\NormalMapInstance_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_VS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\NormalMapObject_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
+      <Filter>Include\HLSL\BasicEffect</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Rain_GS.hlsl">
-      <Filter>Include\HLSL</Filter>
+    <FxCompile Include="..\..\Include\HLSL\NormalMapInstance_VS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Rain_PS.hlsl">
-      <Filter>Include\HLSL</Filter>
+    <FxCompile Include="..\..\Include\HLSL\NormalMap_PS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Rain_SO_GS.hlsl">
-      <Filter>Include\HLSL</Filter>
+    <FxCompile Include="..\..\Include\HLSL\DisplacementMapObject_VS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Rain_SO_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
+    <FxCompile Include="..\..\Include\HLSL\DisplacementMap_HS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Rain_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
+    <FxCompile Include="..\..\Include\HLSL\DisplacementMapInstance_VS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\DisplacementMap_DS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\BasicObject_VS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\BasicInstance_VS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Basic_PS.hlsl">
+      <Filter>Include\HLSL\BasicEffect</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Sky_PS.hlsl">
-      <Filter>Include\HLSL</Filter>
+      <Filter>Include\HLSL\SkyEffect</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Sky_VS.hlsl">
-      <Filter>Include\HLSL</Filter>
+      <Filter>Include\HLSL\SkyEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_PS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CalcHash_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortCount_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortCountersPrefix_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortDispatch_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

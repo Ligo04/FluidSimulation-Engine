@@ -1,4 +1,3 @@
-
 // 方向光
 struct DirectionalLight
 {
@@ -82,8 +81,6 @@ void ComputeDirectionalLight(Material mat, DirectionalLight L,
         spec = specFactor * mat.Specular * L.Specular;
     }
 }
-
-
 void ComputePointLight(Material mat, PointLight L, float3 pos, float3 normal, float3 toEye,
 	out float4 ambient, out float4 diffuse, out float4 spec)
 {
@@ -177,6 +174,7 @@ void ComputeSpotLight(Material mat, SpotLight L, float3 pos, float3 normal, floa
     diffuse *= att;
     spec *= att;
 }
+
 
 float3 NormalSampleToWorldSpace(float3 normalMapSample,
     float3 unitNormalW,
