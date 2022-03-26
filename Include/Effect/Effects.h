@@ -547,6 +547,7 @@ public:
 	void SetRadixSortCountState();
 	void SetRadixSortCountPrefixState();
 	void SetRadixSortDispatchState();
+	void SetFindCellStartAndEndState();
 	void SetInputSRVByName(LPCSTR name, ID3D11ShaderResourceView* srv);
 	void SetOutPutUAVByName(LPCSTR name, ID3D11UnorderedAccessView*  uav);
 
@@ -572,6 +573,30 @@ private:
 	std::unique_ptr<Impl> m_pImpl;
 };
 
+
+class PBFSolverEffect :public IEffect
+{
+public:
+	PBFSolverEffect();
+	virtual ~PBFSolverEffect() override;
+
+
+	PBFSolverEffect(PBFSolverEffect&& moveFrom) noexcept;
+	PBFSolverEffect& operator=(PBFSolverEffect&& moveFrom) noexcept;
+
+	//初始化资源
+	bool Init(ID3D11Device* device, const std::wstring& effectPath);
+
+	// 
+	// IEffect
+	//
+
+	// 应用常量缓冲区和纹理资源的变更
+	void Apply(ID3D11DeviceContext* deviceContext) override;
+private:
+	class Impl;
+	std::unique_ptr<Impl> m_pImpl;
+};
 
 
 

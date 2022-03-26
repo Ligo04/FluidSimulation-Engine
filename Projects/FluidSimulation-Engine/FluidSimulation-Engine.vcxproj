@@ -25,6 +25,8 @@
     <ClCompile Include="..\..\Src\Effect\EffectHelper.cpp" />
     <ClCompile Include="..\..\Src\Effect\NeighborSearch.cpp" />
     <ClCompile Include="..\..\Src\Effect\NeighborSearchEffect.cpp" />
+    <ClCompile Include="..\..\Src\Effect\PBFSolver.cpp" />
+    <ClCompile Include="..\..\Src\Effect\PBFSolverEffect.cpp" />
     <ClCompile Include="..\..\Src\Effect\PointSpriteEffect.cpp" />
     <ClCompile Include="..\..\Src\Effect\PointSpriteRender.cpp" />
     <ClCompile Include="..\..\Src\Effect\SkyEffect.cpp" />
@@ -63,6 +65,7 @@
     <ClInclude Include="..\..\Include\Effect\EffectHelper.h" />
     <ClInclude Include="..\..\Include\Effect\Effects.h" />
     <ClInclude Include="..\..\Include\Effect\NeighborSearch.h" />
+    <ClInclude Include="..\..\Include\Effect\PBFSolver.h" />
     <ClInclude Include="..\..\Include\Effect\PointSpriteRender.h" />
     <ClInclude Include="..\..\Include\Effect\SkyRender.h" />
     <ClInclude Include="..\..\Include\Graphics\d3dApp.h" />
@@ -173,6 +176,20 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CS</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\Include\HLSL\Fluid\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\FindCellStart_CS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CS</EntryPointName>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\Include\HLSL\Fluid\%(Filename).cso</ObjectFileOutput>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CS</EntryPointName>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\Include\HLSL\Fluid\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_GS.hlsl">

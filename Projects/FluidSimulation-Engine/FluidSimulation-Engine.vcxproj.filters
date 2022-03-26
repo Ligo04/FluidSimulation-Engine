@@ -167,6 +167,12 @@
     <ClCompile Include="..\..\Src\Effect\NeighborSearch.cpp">
       <Filter>Src\Effect</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Src\Effect\PBFSolver.cpp">
+      <Filter>Src\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Src\Effect\PBFSolverEffect.cpp">
+      <Filter>Src\Effect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Src\GameApp.h">
@@ -253,6 +259,9 @@
     <ClInclude Include="..\..\Include\Effect\NeighborSearch.h">
       <Filter>Include\Effect</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\Effect\PBFSolver.h">
+      <Filter>Include\Effect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Include\HLSL\Fluid\FliudCommon.hlsli">
@@ -330,6 +339,9 @@
       <Filter>Include\HLSL\FluidEffect</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortDispatch_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\FindCellStart_CS.hlsl">
       <Filter>Include\HLSL\FluidEffect</Filter>
     </FxCompile>
   </ItemGroup>

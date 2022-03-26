@@ -22,6 +22,11 @@ Buffer<uint> g_DispatchCounters:register(t6);
 RWBuffer<uint> g_DstKey:register(u5);
 RWBuffer<uint> g_DstVal:register(u6);
 
+//find the cell start 
+Buffer<uint> g_Cellid;
+RWBuffer<uint> g_CellStart:register(u7);
+RWBuffer<uint> g_CellEnd:register(u8);
+
 #define RADIX_D 4
 #define RADIX_R 16
 #define THREAD_NUM_X 1024
@@ -29,7 +34,7 @@ RWBuffer<uint> g_DstVal:register(u6);
 cbuffer Constant : register(b0)
 {
     float g_CellFactor;
-    int g_CurrIteration;   //µ±Ç°µü´ú
+    int g_CurrIteration;   
     uint g_KeyNums;
     uint g_CounterNums;
 
