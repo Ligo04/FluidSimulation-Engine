@@ -29,11 +29,11 @@ public:
 
 private:
 	bool InitResource();
-	void UpdateFluidSystem(float dt);
 	void DrawSceneWithFluid();
 
 private:
 	ObjReader m_ObjReader;
+
 	std::vector<GameObject> m_Walls;							//墙体
 
 	DirectionalLight m_DirLight;								//方向光源
@@ -46,6 +46,16 @@ private:
 	FirstPersonCameraController m_FPSCameraController;			// 摄像机控制器
 
 	std::unique_ptr<FluidSystem> m_pFluidSystem;				//流体模拟系统
+	FluidRender::ParticleParams m_ParticleParmas;			   //粒子的参数
+	PBFSolver::PBFParams m_PBFParams;							//
+
+
+	bool m_DebugDepth = false;
+	bool m_PBFRun = true;
+	bool m_Step = false;
+	bool m_FirstRun = true;
+	bool m_DrawFluid = false;
+
 };
 
 

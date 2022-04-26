@@ -420,83 +420,34 @@ private:
 	std::unique_ptr<Impl> pImpl;
 };
 
-class ParticleEffect : public IEffect
+class FluidEffect :public IEffect,public IEffectTransform
 {
 public:
-	ParticleEffect();
-	virtual ~ParticleEffect() override;
-
-	ParticleEffect(ParticleEffect&& moveFrom) noexcept;
-	ParticleEffect& operator=(ParticleEffect&& moveFrom) noexcept;
-
-	// 初始化所需资源
-	// 若effectPath为HLSL/Fire
-	// 则会寻找文件: 
-	// - HLSL/Fire_SO_VS.hlsl
-	// - HLSL/Fire_SO_GS.hlsl
-	// - HLSL/Fire_VS.hlsl
-	// - HLSL/Fire_GS.hlsl
-	// - HLSL/Fire_PS.hlsl
-	bool Init(ID3D11Device* device, const std::wstring& effectPath);
-
-	// 产生新粒子到顶点缓冲区
-	void SetRenderToVertexBuffer(ID3D11DeviceContext* deviceContext);
-	// 绘制粒子系统
-	void SetRenderDefault(ID3D11DeviceContext* deviceContext);
-
-	void XM_CALLCONV SetViewProjMatrix(DirectX::FXMMATRIX VP);
-
-	void SetEyePos(const DirectX::XMFLOAT3& eyePos);
-
-	void SetGameTime(float t);
-	void SetTimeStep(float step);
-
-	void SetEmitDir(const DirectX::XMFLOAT3& dir);
-	void SetEmitPos(const DirectX::XMFLOAT3& pos);
-
-	void SetEmitInterval(float t);
-	void SetAliveTime(float t);
-
-	void SetTextureArray(ID3D11ShaderResourceView* textureArray);
-	void SetTextureRandom(ID3D11ShaderResourceView* textureRandom);
-
-	void SetBlendState(ID3D11BlendState* blendState, const FLOAT blendFactor[4], UINT sampleMask);
-	void SetDepthStencilState(ID3D11DepthStencilState* depthStencilState, UINT stencilRef);
-
-	void SetDebugObjectName(const std::string& name);
-
-	// 
-	// IEffect
-	//
-
-	// 应用常量缓冲区和纹理资源的变更
-	void Apply(ID3D11DeviceContext* deviceContext) override;
-
-private:
-	class Impl;
-	std::unique_ptr<Impl> pImpl;
-};
-
-class PointSpriteEffect :public IEffect,public IEffectTransform
-{
-public:
-	PointSpriteEffect();
-	virtual ~PointSpriteEffect() override;
+	FluidEffect();
+	virtual ~FluidEffect() override;
 
 
-	PointSpriteEffect(PointSpriteEffect&& moveFrom) noexcept;
-	PointSpriteEffect& operator=(PointSpriteEffect&& moveFrom) noexcept;
+	FluidEffect(FluidEffect&& moveFrom) noexcept;
+	FluidEffect& operator=(FluidEffect&& moveFrom) noexcept;
 
 	//初始化资源
 	bool Init(ID3D11Device* device, const std::wstring& effectPath);
 
 	//深度贴图
-	void SetPointSpriteDepth(ID3D11DeviceContext* deviceContext);
-
-	void SetPointSpriteRender(ID3D11DeviceContext* deviceContext);
+	void SetPointSpriteDepthState(ID3D11DeviceContext* deviceContext);
+	//厚度贴图
+	void SetPointSpriteThicknessState(ID3D11DeviceContext* deviceContext);
+	void SetParticleRenderState(ID3D11DeviceContext* deviceContext);
+	//
+	void SetBlurDepthState(ID3D11DeviceContext* deviceContext);
+	void SetCompositeState(ID3D11DeviceContext* deviceContext);
+	void SetTextureDepth(ID3D11ShaderResourceView* textureDepth);
+	void SetTextureThickness(ID3D11ShaderResourceView* textureThickness);
+	void SetTextureScene(ID3D11ShaderResourceView* textureScene);
 
 	void SetDepthStencilState(ID3D11DepthStencilState* depthStenState, UINT stencileValue);
 	void SetRasterizerState(ID3D11RasterizerState* rsState);
+	void SetBlendState(ID3D11BlendState* blendState,const float* factor,UINT mask);
 
 	void SetDirLight(size_t pos, const DirectionalLight& dirLight);
 
@@ -509,10 +460,16 @@ public:
 
 	// 设置摄像机位置
 	void SetEyePos(const DirectX::XMFLOAT3& eyePos);
-
 	void SetPointColor(const DirectX::XMFLOAT4& color);
+	void SetClipPosToEye(const DirectX::XMFLOAT4& clipPosToEye);
+	void SetInvTexScale(const DirectX::XMFLOAT4& invTexScale);
 	void SetPointRadius(float radius);
 	void SetPointScale(float scale);
+
+	void SetBlurRadiusWorld(float blurRaiudsWorld);
+	void SetBlurScale(float blurScale);
+	void SetBlurFalloff(float blurFalloff);
+	void SetIor(float ior);
 
 
 	void SetDebugObjectName(const std::string& name);
@@ -543,6 +500,9 @@ public:
 	//初始化资源
 	bool Init(ID3D11Device* device, const std::wstring& effectPath);
 
+	void SetCalcBoundsState();
+	void SetCalcBoundsGroupState();
+	void SetCalcBoundsFinalizeState();
 	void SetCalcHashState();
 	void SetRadixSortCountState();
 	void SetRadixSortCountPrefixState();
@@ -552,14 +512,14 @@ public:
 	void SetOutPutUAVByName(LPCSTR name, ID3D11UnorderedAccessView*  uav);
 
 
-	void SetCellFactor(float factor);
+	void SetBoundsGroupNum(UINT boundsGroupNum);
+	void SetBoundsFinalizeNum(UINT boundsGroupNum);
+	void SetCellSize(float CellSize);
 	void SetParticleNums(UINT particleNum);
 	void SetCurrIteration(int currIteration);
 	void SetCounterNums(UINT counterNum);
 	void SetKeyNums(UINT keyNums);
 	void SetBlocksNums(UINT blocksNums);
-	void SetDebugObjectName(const std::string& name);
-
 
 
 	// 
@@ -586,6 +546,53 @@ public:
 
 	//初始化资源
 	bool Init(ID3D11Device* device, const std::wstring& effectPath);
+
+	void SetInputSRVByName(LPCSTR name, ID3D11ShaderResourceView* srv);
+	void SetOutPutUAVByName(LPCSTR name, ID3D11UnorderedAccessView* uav);
+
+	void SetPredictPositionState();
+	void SetReorderParticleState();
+	void SetCollisionParticleState();
+	void SetCollisionPlaneState();
+	void SetCalcLagrangeMultiplierState();
+	void SetCalcDisplacementState();
+	void SetADDDeltaPositionState();
+	void SetCalcVorticityState();
+	void SetSolverVelocitiesState();
+	void SePBFFinalizeState();
+	void SetUpdateVelocityState();
+	void SetSolverContactState();
+
+	void SetPlaneNums(int wallNums);
+	void SetPlane(size_t pos, const DirectX::XMFLOAT3& planePos, const DirectX::XMFLOAT3& planeNor);
+
+	void SetParticleNums(UINT particleNums);
+	void SetCollisionDistance(float distance);
+	void SetCollisionThreshold(float threshold);
+	void SetDeltaTime(float deltatime);
+	void SetCellSize(float CellSize);
+	void SetInverseDeltaTime(float invDt);
+	void SetPloy6Coff(float ploy6Coff);
+	void SetSpikyCoff(float spikyCoff);
+	void SetSpikyGradCoff(float spikyGardCoff);
+	void SetViscosityCoff(float viscosityCoff);
+	void SetLambadEps(float lambdaEps);
+	void SetDeltaQ(float deltaQ);
+	void SetScorrK(float scorrK);
+	void SetScorrN(float scorrN);
+	void SetVorticityConfinement(float vorticityConfinement);
+	void SetVorticityC(float vorticityC);
+	void SetInverseDensity_0(float inverseDensity_0);
+	void SetSphSmoothLength(float sphSmoothLength);
+	void SetGravity(const DirectX::XMFLOAT3& gravity);
+	void SetMaxCollisionPlanes(int max);
+	void SetMaxNeighBorPerParticle(int max);
+	void SetParticleRadiusSq(float  radiussq);
+	void SetSOR(float sor);
+	void SetMaxSpeed(float maxspeed);
+	void SetMaxVelocityDelta(float elocityDelta);
+	void SetRestituion(float restituion);
+
 
 	// 
 	// IEffect

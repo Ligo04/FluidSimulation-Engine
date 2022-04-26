@@ -1,7 +1,7 @@
 #include "NerghborSearchCommon.hlsli"
 
-groupshared uint localPrefix[THREAD_NUM_X];
 
+groupshared uint localPrefix[THREAD_NUM_X];
 
 //excusive scan
 void PresumLocal(uint GI : SV_GroupIndex)

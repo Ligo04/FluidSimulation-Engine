@@ -54,6 +54,12 @@
     <Filter Include="Include\HLSL\SkyEffect">
       <UniqueIdentifier>{a62c664c-99c4-4a43-be0e-b832d790c437}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\HLSL\FluidEffect\Render">
+      <UniqueIdentifier>{76db256f-e14d-4be5-81fe-33295bb6095f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\HLSL\FluidEffect\PBFSolver">
+      <UniqueIdentifier>{9d1dfb75-e809-4216-b219-60e958b1aae1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Src\Component\Camera.cpp">
@@ -146,13 +152,13 @@
     <ClCompile Include="..\..\ThirdParty\Imgui\src\imgui_widgets.cpp">
       <Filter>Src\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Src\Effect\PointSpriteRender.cpp">
+    <ClCompile Include="..\..\Src\Effect\FluidRender.cpp">
       <Filter>Src\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\Hierarchy\FluidSystem.cpp">
       <Filter>Src\Hierarchy</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Src\Effect\PointSpriteEffect.cpp">
+    <ClCompile Include="..\..\Src\Effect\FluidEffect.cpp">
       <Filter>Src\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Src\Hierarchy\CameraController.cpp">
@@ -244,7 +250,7 @@
     <ClInclude Include="..\..\Include\Utils\DXTrace.h">
       <Filter>Include\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\Effect\PointSpriteRender.h">
+    <ClInclude Include="..\..\Include\Effect\FluidRender.h">
       <Filter>Include\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\Hierarchy\FluidSystem.h">
@@ -262,11 +268,11 @@
     <ClInclude Include="..\..\Include\Effect\PBFSolver.h">
       <Filter>Include\Effect</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\Graphics\Buffer.h">
+      <Filter>Include\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Include\HLSL\Fluid\FliudCommon.hlsli">
-      <Filter>Include\HLSL\FluidEffect</Filter>
-    </None>
     <None Include="..\..\Include\HLSL\Basic.hlsli">
       <Filter>Include\HLSL\BasicEffect</Filter>
     </None>
@@ -276,20 +282,17 @@
     <None Include="..\..\Include\HLSL\Sky.hlsli">
       <Filter>Include\HLSL\SkyEffect</Filter>
     </None>
+    <None Include="..\..\Include\HLSL\Fluid\FliudCommon.hlsli">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </None>
+    <None Include="..\..\Include\HLSL\Fluid\PBFSolverCommon.hlsli">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </None>
     <None Include="..\..\Include\HLSL\Fluid\NerghborSearchCommon.hlsli">
-      <Filter>Include\HLSL\FluidEffect</Filter>
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_GS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSpriteDepth_PS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
-    </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_VS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
-    </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\NormalMapObject_VS.hlsl">
       <Filter>Include\HLSL\BasicEffect</Filter>
     </FxCompile>
@@ -326,23 +329,98 @@
     <FxCompile Include="..\..\Include\HLSL\Sky_VS.hlsl">
       <Filter>Include\HLSL\SkyEffect</Filter>
     </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\BlurDepth_PS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_GS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_PS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSprite_VS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSpriteDepth_PS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PointSpriteThickness_PS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\EllipsoidDepth_VS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\EllipsoidDepth_GS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\EllipsoidDepth_PS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\Composite_PS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Fluid\CalcHash_CS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortCount_CS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\AddDeltaPosition_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortCountersPrefix_CS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\UpdateVelocity_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\SolveContact_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\ReorderParticle_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortDispatch_CS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortCountersPrefix_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\RadixSortCount_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PredictPosition_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PBFFinalize_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Fluid\FindCellStart_CS.hlsl">
-      <Filter>Include\HLSL\FluidEffect</Filter>
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CollisionPlane_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CollisionParticle_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CalcVorticity_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CalcLagrangeMultiplier_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CalcDisplacement_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CalcBoundsGroup_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CalcBoundsFinalize_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CalcBounds_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\PassThrough_VS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\Render</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\SolverVelocities_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

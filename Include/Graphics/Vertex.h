@@ -164,4 +164,27 @@ struct PointVertexIn
 };
 
 
+struct MeshVertexIn
+{
+	MeshVertexIn() = default;
+
+	MeshVertexIn(const MeshVertexIn&) = default;
+	MeshVertexIn& operator=(const MeshVertexIn&) = default;
+
+	MeshVertexIn(MeshVertexIn&&) = default;
+	MeshVertexIn& operator=(MeshVertexIn&&) = default;
+
+	constexpr MeshVertexIn(const DirectX::XMFLOAT3 & _pos, const DirectX::XMFLOAT3 & _normal,
+		const DirectX::XMFLOAT2 & _texcoord, const DirectX::XMFLOAT4 & _color) :
+		pos(_pos), normal(_normal), texcoord(_texcoord), color(_color) {};
+
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 normal;
+	DirectX::XMFLOAT2 texcoord;
+	DirectX::XMFLOAT4 color;
+
+	static const D3D11_INPUT_ELEMENT_DESC inputLayout[4];
+};
+
+
 #endif

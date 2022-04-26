@@ -14,7 +14,7 @@ GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWi
 	m_pBasicEffect(std::make_unique<BasicEffect>()),
 	m_pSkyEffect(std::make_unique<SkyEffect>()),
 	m_pFluidSystem(std::make_unique<FluidSystem>()),
-	m_DirLight()
+	m_DirLight(), m_ParticleParmas{},m_PBFParams{}
 {
 	
 }
@@ -34,6 +34,7 @@ bool GameApp::Init()
 	if (!m_pBasicEffect->InitAll(m_pd3dDevice.Get()))
 		return false;
 
+
 	if (!m_pSkyEffect->InitAll(m_pd3dDevice.Get()))
 		return false;
 
@@ -44,6 +45,7 @@ bool GameApp::Init()
 		return false;
 
 
+
 	return true;
 }
 
@@ -51,7 +53,6 @@ void GameApp::OnResize()
 {
 
 	D3DApp::OnResize();
-
 
 	// 摄像机变更显示
 	if (m_pCamera != nullptr)
@@ -71,8 +72,7 @@ void GameApp::UpdateScene(float dt)
 
 	m_pBasicEffect->SetViewMatrix(m_pCamera->GetViewXM());
 	m_pBasicEffect->SetEyePos(m_pCamera->GetPosition());
-
-	UpdateFluidSystem(dt);
+	m_pFluidSystem->UpdateCamera(m_pd3dImmediateContext.Get(), *m_pCamera);
 }
 
 void GameApp::DrawScene()
@@ -82,7 +82,6 @@ void GameApp::DrawScene()
 
 	m_pd3dImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), reinterpret_cast<const float*>(&Colors::Silver));
 	m_pd3dImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	
 
 	// ******************
 	// 正常绘制场景
@@ -90,17 +89,19 @@ void GameApp::DrawScene()
 
 	//绘制墙体
 	m_pBasicEffect->SetRenderDefault(m_pd3dImmediateContext.Get(), BasicEffect::RenderObject);
+	m_Walls[0].Draw(m_pd3dImmediateContext.Get(), m_pBasicEffect.get());
 	for (size_t i = 0; i < m_Walls.size(); ++i)
 	{
 		m_Walls[i].Draw(m_pd3dImmediateContext.Get(), m_pBasicEffect.get());
 	}
 
-	DrawSceneWithFluid();
-
-
 	// 绘制天空盒
 	m_pSkyEffect->SetRenderDefault(m_pd3dImmediateContext.Get());
 	m_pLakeCube->Draw(m_pd3dImmediateContext.Get(), *m_pSkyEffect, *m_pCamera);
+
+
+	//最后绘制流体
+	DrawSceneWithFluid();
 
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	HR(m_pSwapChain->Present(0, 0));
@@ -108,7 +109,6 @@ void GameApp::DrawScene()
 
 bool GameApp::InitResource()
 {
-
 	// ******************
     // 初始化摄像机和控制器
     //
@@ -118,8 +118,8 @@ bool GameApp::InitResource()
 
 	camera->SetViewPort(0.0f, 0.0f, (float)m_ClientWidth, (float)m_ClientHeight);
 	// 注意：反转Z时需要将近/远平面对调
-	camera->SetFrustum(XM_PI / 3, AspectRatio(), 1.0f, 1000.0f);
-	camera->LookTo(XMFLOAT3(0.0f, 2.0f, -10.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	camera->SetFrustum(XM_PI / 3.0f, AspectRatio(), 1.0f, 1000.0f);
+	camera->LookTo(XMFLOAT3(2.5f, 2.0f, -4.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 	m_FPSCameraController.InitCamera(camera.get());
 	m_FPSCameraController.SetMoveSpeed(10.0f);
@@ -165,7 +165,9 @@ bool GameApp::InitResource()
 	dirLight.ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	dirLight.diffuse = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
 	dirLight.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	dirLight.direction =   XMFLOAT3(5.0f, 0.0f, 0.0f);
+	DirectX::XMFLOAT3 dir = XMFLOAT3(-5.0f, -15.0f, -7.5f);
+	XMStoreFloat3(&dir,XMVector3Normalize(XMLoadFloat3(&dir)));
+	dirLight.direction = dir;
 	m_DirLight = dirLight;
 	m_pBasicEffect->SetDirLight(0, m_DirLight);
 
@@ -174,9 +176,9 @@ bool GameApp::InitResource()
 	std::vector<Transform> wallsWorlds =
 	{
 		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,0.0f)},        //下面(地面)
-		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(-XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,5.0f)}, //前面
-		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,-5.0f)},    //后面
-		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,-XM_PI / 2.0f),XMFLOAT3(-5.0f,0.0f,0.0f)},  //左侧
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(-XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,2.5f)}, //前面
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,-0.0f)},    //后面
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,-XM_PI / 2.0f),XMFLOAT3(-2.5f,0.0f,0.0f)},  //左侧
 		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,XM_PI / 2.0f),XMFLOAT3(5.0f,0.0f,0.0f)},      //右侧
 	};
 
@@ -193,8 +195,6 @@ bool GameApp::InitResource()
 		model.modelParts[0].texDiffuse.GetAddressOf()));
 	m_Walls[0].SetModel(std::move(model));
 	m_Walls[0].GetTransform().SetPosition(wallsWorlds[0].GetPosition());
-
-
 
 	//墙体
 	Model model1{};
@@ -221,61 +221,171 @@ bool GameApp::InitResource()
 	// ******************
     // 初始化流体系统
 	//
+	std::vector<DirectX::XMFLOAT3> wallPos;
+	std::vector<DirectX::XMFLOAT3> wallNor;
+	for (auto& p : wallsWorlds)
+	{
+		wallPos.push_back(p.GetPosition());
+	}
+	wallNor.push_back(DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f));   //下面(地面)
+	wallNor.push_back(DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f));  //前面
+	wallNor.push_back(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f));   //后面
+	wallNor.push_back(DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f));  //左侧
+	wallNor.push_back(DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f)); //右侧
+	m_pFluidSystem->SetPBFBoundaryWalls(wallPos, wallNor);
 
 	XMMATRIX view = m_pCamera->GetViewXM();
-	PointSpriteRender::ParticleParams parmas{};
-	parmas.radius = 0.075f;			//世界空间的半径
 	float aspect = m_pCamera->GetAspect();
 	float fov = m_pCamera->GetFovy();
 	//计算出世界空间的长度投影到屏幕空间的长度
-	parmas.scale = float(m_ClientWidth) / aspect * (1.0f / tanf(fov * 0.5f));
-	parmas.color = DirectX::XMFLOAT4(0.0f, 0.5f, 1.0f,1.0f);
+	m_ParticleParmas.radius = 0.10f;		
+	m_ParticleParmas.RestDistance = m_ParticleParmas.radius * 0.65f;
+	m_ParticleParmas.scale = float(m_ClientWidth) / aspect * (1.0f / (tanf(fov * 0.5f)));
+	m_ParticleParmas.color = DirectX::XMFLOAT4(0.0f,0.5f,1.0f,1.0f);
 
-	m_pFluidSystem->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(), parmas, dirLight,m_ClientWidth,m_ClientHeight);
+	m_ParticleParmas.blurRadiusWorld = m_ParticleParmas.radius * 0.5f;
+	m_ParticleParmas.blurScale = m_ParticleParmas.scale;
+	m_ParticleParmas.blurFalloff = 1.0f;
+	m_ParticleParmas.ior = 1.0f;
+	m_ParticleParmas.clipToEye = DirectX::XMFLOAT4(tanf(fov * 0.5f) * aspect, tanf(fov * 0.5f), tanf(fov * 0.5f) * aspect, tanf(fov * 0.5f) * aspect);
+	m_ParticleParmas.invTexScale = DirectX::XMFLOAT4(1.0f / m_ClientWidth, aspect / m_ClientWidth, 0.0f, 0.0f);
+	m_pFluidSystem->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(), m_ParticleParmas, dirLight,m_ClientWidth,m_ClientHeight);
   
-
+	m_PBFParams.particleRadius = m_ParticleParmas.radius;
+	m_PBFParams.collisionDistance = m_ParticleParmas.RestDistance *0.5f;
+	m_PBFParams.cellSize = m_ParticleParmas.radius;
+	m_PBFParams.subStep = 2;
+	m_PBFParams.maxSolverIterations = 3;
+	m_PBFParams.gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
+	m_PBFParams.sphSmoothLength = m_ParticleParmas.radius ;
+	m_PBFParams.lambdaEps= 1000.0f; 
+	m_PBFParams.vorticityConfinement = 80.0f;
+	m_PBFParams.scorrK = 0.01f;
+	m_PBFParams.scorrN = 4;
+	m_PBFParams.vorticityC = 0.001f;
+	m_PBFParams.density = 6643.09717f;//(9 * 315.0f * powf(5, 3))/ (64 * powf(9, 3) * XM_PI * powf(m_PBFParams.sphSmoothLength, 3.0f));
+	m_PBFParams.maxNeighborPerParticle= 96;
+	m_PBFParams.maxContactPlane = 6;
+	m_pFluidSystem->SetFluidPBFParams(m_PBFParams);
 	// ******************
 	// 设置调试对象名
 	//
 	m_pLakeCube->SetDebugObjectName("LakeCube");
-
+	m_pFluidSystem->SetDebugObjectName();
 	return true;
 }
 
-void GameApp::UpdateFluidSystem(float dt)
-{
-	if (ImGui::Begin("Fliud Simulation"))
-	{
-
-	}
-	ImGui::End();
-
-	//*******************
-	//流体系统更新
-	m_pFluidSystem->update(m_pd3dImmediateContext.Get(), dt, *m_pCamera);
-}
 
 void GameApp::DrawSceneWithFluid()
 {
 	//*******************
 	//最后绘制流体系统
 	//
-	if (ImGui::Begin("Depth Texture"))
+	if (ImGui::Begin("Fliud Simulation"))
 	{
-		ImVec2 winSize = ImGui::GetWindowSize();
-		float smaller = (std::min)((winSize.x - 20) / AspectRatio(), winSize.y - 36);
-		ImGui::Image(m_pFluidSystem->GetParticleDepthSRV(m_pd3dImmediateContext.Get()), ImVec2(smaller * AspectRatio(), smaller));
+		ImGui::Checkbox("Debug Information", &m_DebugDepth);
+		if (ImGui::Button("Reset"))
+		{
+			m_pFluidSystem->Reset(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get());
+			m_FirstRun = true;
+			m_PBFRun = false;
+		}
+		ImGui::Checkbox("Run", &m_PBFRun);
+		if (ImGui::Button("Next"))
+		{
+			m_Step = true;
+		}
+
+		ImGui::Checkbox("DrawFluid", &m_DrawFluid);
+
+		bool flag = false;
+		ImGui::Text("SubStep: %d", m_PBFParams.subStep);
+		if (ImGui::SliderInt("##0", &m_PBFParams.subStep, 1, 10, ""))
+		{
+			flag = true;
+		}
+		ImGui::Text("MaxSolverIterations: %d", m_PBFParams.maxSolverIterations);
+		if (ImGui::SliderInt("##1", &m_PBFParams.maxSolverIterations, 1, 10, ""))
+		{
+			flag = true;
+		}
+		if (ImGui::InputFloat3("Gravity", (float*)&m_PBFParams.gravity))
+		{
+			flag = true;
+		}
+		ImGui::Text("LambdaEps: %f", m_PBFParams.lambdaEps);
+		if (ImGui::SliderFloat("##2", &m_PBFParams.lambdaEps, 0, 5000, ""))
+		{
+			flag = true;
+		}
+		ImGui::Text("Viscosity: %f", m_PBFParams.vorticityConfinement);
+		if (ImGui::SliderFloat("##3", &m_PBFParams.vorticityConfinement, 0, 120, ""))
+		{
+			flag = true;
+		}
+		ImGui::Text("Viscosity Confinement: %f", m_PBFParams.vorticityC);
+		if(ImGui::SliderFloat("##4", &m_PBFParams.vorticityC, 0, 120, ""))
+		{
+			flag = true;
+		}
+
+		if (flag)
+		{
+			m_pFluidSystem->SetFluidPBFParams(m_PBFParams);
+		}
 	}
+
+	if (m_DebugDepth)
+	{
+		if (ImGui::Begin("Depth Texture"))
+		{
+			ImVec2 winSize = ImGui::GetWindowSize();
+			float smaller = (std::min)((winSize.x - 20) / AspectRatio(), winSize.y - 36);
+			ImGui::Image(m_pFluidSystem->GetParticleDepthSRV(m_pd3dImmediateContext.Get()), ImVec2(smaller * AspectRatio(), smaller));
+		}
+		ImGui::End();
+
+		if (ImGui::Begin("Thickness Texture"))
+		{
+			ImVec2 winSize = ImGui::GetWindowSize();
+			float smaller = (std::min)((winSize.x - 20) / AspectRatio(), winSize.y - 36);
+			ImGui::Image(m_pFluidSystem->GetParticleThicknessSRV(m_pd3dImmediateContext.Get()), ImVec2(smaller * AspectRatio(), smaller));
+		}
+		ImGui::End();
+	}
+
+	if (!m_DrawFluid)
+	{
+		m_pFluidSystem->DrawParticle(m_pd3dImmediateContext.Get());
+	}
+	else
+	{
+		m_pFluidSystem->DrawFluid(m_pd3dImmediateContext.Get(), m_pRenderTargetView.Get());
+	}
+
+	//绘制完再更新
+	static bool isfirst = true;
+	if (isfirst)
+	{
+		isfirst = false;
+	}
+	else
+	{
+		if (m_PBFRun || m_Step)
+		{
+			//固定时间步长
+			//*******************
+			//流体系统更新
+			m_pFluidSystem->UpdateFluid(m_pd3dImmediateContext.Get(), 1.0f / 60.0f);
+			m_Step = false;
+		}
+
+	}
+
+
 
 	//恢复原来输出合并状态
 	m_pd3dImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
-
-
-
-	m_pFluidSystem->DrawParticle(m_pd3dImmediateContext.Get());
-	m_pFluidSystem->CalcHash(m_pd3dImmediateContext.Get());
-	m_pFluidSystem->BeginRadix(m_pd3dImmediateContext.Get());
-
 	ImGui::End();
 
 	ImGui::Render();

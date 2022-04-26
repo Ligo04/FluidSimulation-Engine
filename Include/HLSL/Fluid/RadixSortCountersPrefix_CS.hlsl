@@ -1,8 +1,8 @@
 #include "NerghborSearchCommon.hlsli"
 
+
 //一次申请最大内容
 groupshared uint localPrefix[THREAD_NUM_X];
-
 
 //excusive scan
 void PresumLocalCounter(uint GI : SV_GroupIndex)

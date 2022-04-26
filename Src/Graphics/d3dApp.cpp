@@ -33,7 +33,7 @@ D3DApp::D3DApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidt
 	m_Resizing(false)
 {
 	ZeroMemory(&m_ScreenViewport, sizeof(D3D11_VIEWPORT));
-
+	
 
 	// 让一个全局指针获取这个类，这样我们就可以在Windows消息处理的回调函数
 	// 让这个类调用内部的回调函数了
@@ -129,12 +129,8 @@ void D3DApp::OnResize()
 		assert(m_pd3dDevice1);
 		assert(m_pSwapChain1);
 	}
-
+	
 	// 释放渲染管线输出用到的相关资源
-	m_pRenderTargetView.Reset();
-	m_pDepthStencilView.Reset();
-	m_pDepthStencilBuffer.Reset();
-
 	// 重设交换链并且重新创建渲染目标视图
 	ComPtr<ID3D11Texture2D> backBuffer;
 	HR(m_pSwapChain->ResizeBuffers(1, m_ClientWidth, m_ClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
@@ -143,11 +139,9 @@ void D3DApp::OnResize()
 
 	// 设置调试对象名
 	D3D11SetDebugObjectName(backBuffer.Get(), "BackBuffer[0]");
-
+	
 	backBuffer.Reset();
-
-
-	D3D11_TEXTURE2D_DESC depthStencilDesc;
+	D3D11_TEXTURE2D_DESC depthStencilDesc{};
 
 	depthStencilDesc.Width = m_ClientWidth;
 	depthStencilDesc.Height = m_ClientHeight;
