@@ -187,4 +187,32 @@ struct MeshVertexIn
 };
 
 
+struct Anisotropy
+{
+	DirectX::XMFLOAT4 q1;
+	DirectX::XMFLOAT4 q2;
+	DirectX::XMFLOAT4 q3;
+};
+
+
+struct FluidVertexIn
+{
+	FluidVertexIn() = default;
+
+	FluidVertexIn(const FluidVertexIn&) = default;
+	FluidVertexIn& operator=(const FluidVertexIn&) = default;
+
+	FluidVertexIn(FluidVertexIn&&) = default;
+	FluidVertexIn& operator=(FluidVertexIn&&) = default;
+
+	constexpr FluidVertexIn(const DirectX::XMFLOAT3 & _pos, const Anisotropy & _Ani) :
+		pos(_pos), ani(_Ani) {};
+
+	DirectX::XMFLOAT3 pos;
+	Anisotropy ani;
+
+	static const D3D11_INPUT_ELEMENT_DESC inputLayout[4];
+};
+
+
 #endif

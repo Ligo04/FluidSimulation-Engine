@@ -71,7 +71,7 @@ uint GetCellHash(int3 cellPos)
     //uint hash = ((cellPos.z << 14) & (~bitmask1)) + ((cellPos.y << 7) & (~bitmask2)) + cellPos.x;
     //uint hash = (cellPos.z << 14) + (cellPos.y << 7) + cellPos.x;
     uint hash = hashFunc(cellPos);
-    return hash % 2097152;
+    return hash % (2 * g_ParticleNums);
 }
 //get LSD 4-bit 
 uint4 get4Bits(uint4 num,int i)

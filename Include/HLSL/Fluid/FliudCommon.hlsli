@@ -10,6 +10,7 @@ static const float2 g_TexCoord[4] = { float2(0.0f, 1.0f), float2(0.0f, 0.0f), fl
 cbuffer CBChangeEveryInstanceDrawing : register(b0)
 {
     matrix g_World;
+    
 };
 
 cbuffer CBChangeEveryFrame : register(b1)
@@ -40,7 +41,9 @@ cbuffer CBChangeFluid : register(b3)
     float g_BlurFalloff;
     float g_Ior;
     
+    
     float4 g_InvTexScale;
+    float4 g_InvViewport;
 }
 
 cbuffer CBChangesRarely : register(b4)
@@ -89,7 +92,7 @@ struct PassThoughVertexOut
 
 struct FluidVertexIn
 {
-    float4 position : POSITION;
+    float3 PosL : POSITION;
     float4 q1 : U;
     float4 q2 : V;
     float4 q3 : W;
@@ -97,7 +100,7 @@ struct FluidVertexIn
 
 struct FluidVertexOut
 {
-    float4 position : POSITION;
+    float4 PosL : POSITION;
     float4 bounds : TEXCOORD0; // xmin, xmax, ymin, ymax
     float4 invQ0 : TEXCOORD1;
     float4 invQ1 : TEXCOORD2;
@@ -108,7 +111,7 @@ struct FluidVertexOut
 
 struct FluidGeoOut
 {
-    float4 position : SV_POSITION;
+    float4 Position : SV_POSITION;
     float4 invQ0 : TEXCOORD0;
     float4 invQ1 : TEXCOORD1;
     float4 invQ2 : TEXCOORD2;
@@ -136,7 +139,7 @@ float Sign(float x)
 }
 
 
-float3 ndcToEyeSpace(float2 coord,float eyeZ)
+float3 viewPortToEyeSpace(float2 coord,float eyeZ)
 {
     float2 clipPosToeye = g_clipPosToEye.xy;
     
@@ -145,22 +148,41 @@ float3 ndcToEyeSpace(float2 coord,float eyeZ)
     return float3(-uv * eyeZ, eyeZ);
 }
 
-bool solveQuadratic(float a, float b, float c, out float minT, out float maxT)
+bool solveQuadraticVS(float a, float b, float c, out float minT, out float maxT)
 {
-#if 0
-	// for debugging
-	minT = -0.5;
-	maxT = 0.5;
-	return true;
-#else
-	//minT = 0.0f;
-	//maxT = 0.0f;
-#endif
-
     if (a == 0.0 && b == 0.0)
     {
         minT = maxT = 0.0;
         return false;
+    }
+
+    float discriminant = b * b - 4.0 * a * c;
+
+    if (discriminant < 0.0)
+    {
+        return false;
+    }
+
+    float t = -0.5 * (b + Sign(b) * sqrt(discriminant));
+    minT = t / a;
+    maxT = c / t;
+
+    if (minT > maxT)
+    {
+        float tmp = minT;
+        minT = maxT;
+        maxT = tmp;
+    }
+
+    return true;
+}
+
+bool solveQuadraticPS(float a, float b, float c, out float minT, out float maxT)
+{
+    if (a == 0.0 && b == 0.0)
+    {
+        minT = maxT = 0.0;
+        return true;
     }
 
     float discriminant = b * b - 4.0 * a * c;

@@ -1,3 +1,10 @@
+struct Anisortopy
+{
+    float4 q1;
+    float4 q2;
+    float4 q3;
+};
+
 //Predict pos
 StructuredBuffer<float3> g_oldPosition : register(t0);
 StructuredBuffer<float3> g_oldVelocity : register(t1);
@@ -19,7 +26,6 @@ RWStructuredBuffer<uint> g_ContactCounts : register(u6);
 RWStructuredBuffer<uint> g_CollisionCounts : register(u7);
 RWStructuredBuffer<float4> g_CollisionPlanes : register(u8);
 
-
 //calclagrangeMUltiplier
 RWStructuredBuffer<float> g_Density : register(u9);
 RWStructuredBuffer<float> g_LambdaMultiplier:register(u10);
@@ -35,6 +41,11 @@ RWStructuredBuffer<float3> g_Impulses : register(u15);
 StructuredBuffer<uint>  g_Particleindex:register(t8); 
 RWStructuredBuffer<float3> g_SolveredPosition:register(u16);
 RWStructuredBuffer<float3> g_SolveredVelocity:register(u17);
+
+//anisotropy
+RWStructuredBuffer<float3> g_SmoothPosition : register(u18);
+RWStructuredBuffer<float3> g_SmoothPositionOmega : register(u19);
+RWStructuredBuffer<Anisortopy> g_Anisortopy : register(u20);
 
 
 #define THREAD_NUM_X 256
@@ -69,7 +80,16 @@ cbuffer PBFConstant : register(b0)
     float g_MaxSpeed;
     float g_MaxVeclocityDelta;
     float g_Restituion;
+    float g_LaplacianSmooth;
+    
+    float g_AnisotropyScale;             //AnisotropyScale
+    float g_AnisotropyMin;
+    float g_AnisotropyMax;
     float g_Pad0;
+    
+    float g_StaticFriction;
+    float g_DynamicFriction;
+    float g_Pad11[2];
 }
 
 cbuffer PBFChanges : register(b1)
@@ -142,16 +162,10 @@ uint hashFunc(uint3 key)
 
 uint GetCellHash(int3 cellPos)
 {
-    //uint3 gridSize = ((g_Bounds[1] - g_Bounds[0]) / g_CellSize) - 1;
-    
-    //cellPos = cellPos & gridSize;
-    //return cellPos.z * gridSize.x * gridSize.y + cellPos.y * gridSize.x + cellPos.x;
-    //uint bitmask1 = (1 << 14) - 1;
-    //uint bitmask2 = (1 << 7) - 1;
     //uint hash = ((cellPos.z << 14) & (~bitmask1)) + ((cellPos.y << 7) & (~bitmask2)) + cellPos.x;
     //uint hash = (cellPos.z << 14) + (cellPos.y << 7) + cellPos.x;
     uint hash = hashFunc(cellPos);
-    return hash % 2097152;
+    return hash % (2 * g_ParticleNums);
 }
 
 //sdf plane function
@@ -164,4 +178,17 @@ float sdfPlane(float3 p, float3 n, float h)
 float sqr(float3 ele)
 {
     return ele.x * ele.x + ele.y * ele.y + ele.z * ele.z;
+}
+
+float Wsmooth(float3 r,float h)
+{
+    float radius = length(r);
+    float res = 0.0f;
+    if (radius < h)
+    {
+        float item = radius / h;
+        res = 1 - pow(item, 3);
+
+    }
+    return res;
 }

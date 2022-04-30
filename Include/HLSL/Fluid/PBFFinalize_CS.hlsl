@@ -18,11 +18,10 @@ void CS( uint3 DTid : SV_DispatchThreadID )
     float3 oldVec = g_oldVelocity[prevIndex];
     float3 deltaVec = currVec + impulse - oldVec;
     float deltaVecLengthsq = dot(deltaVec, deltaVec);
-    if (deltaVecLengthsq > g_MaxVeclocityDelta)
+    if (deltaVecLengthsq > (g_MaxVeclocityDelta * g_MaxVeclocityDelta))
     {
-        deltaVec *= g_MaxVeclocityDelta;
+        deltaVec = deltaVec * rsqrt(deltaVecLengthsq) * g_MaxVeclocityDelta;
     }
-    
     float3 finVec = oldVec + deltaVec;
     g_SolveredVelocity[prevIndex] = finVec;
 }

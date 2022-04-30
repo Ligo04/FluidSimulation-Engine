@@ -422,5 +422,11 @@
     <FxCompile Include="..\..\Include\HLSL\Fluid\SolverVelocities_CS.hlsl">
       <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
     </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\CalcAnisotropy_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\Include\HLSL\Fluid\SmoothPosition_CS.hlsl">
+      <Filter>Include\HLSL\FluidEffect\PBFSolver</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

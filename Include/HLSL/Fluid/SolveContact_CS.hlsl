@@ -11,22 +11,38 @@ void CS( uint3 DTid : SV_DispatchThreadID )
         return;
     }
     
-    float3 currPos = g_sortedNewPosition[DTid.x];
+    float3 currPos = g_sortedNewPosition[DTid.x];                  
+    float3 oldPos = g_sortedOldPosition[DTid.x];
     
-    
-    float3 solverContactPos = float3(0.0f, 0.0f, 0.0f);
     int collisionCount = g_CollisionCounts[DTid.x];
     int i = 0;
     for (i = 0; i < collisionCount; ++i)
     {
         int index = DTid.x * g_MaxCollisionPlanes + i;
         float4 currPlane = g_CollisionPlanes[index];
-        float distance = sdfPlane(currPos, currPlane.xyz, currPlane.w);
-        float3 sdfPos = (-distance) * currPlane.xyz;
-        solverContactPos += sdfPos;
-
+        float distance = sdfPlane(currPos, currPlane.xyz, currPlane.w) - g_CollisionDistance; //r3.w
+        if (distance < 0.0f)
+        {
+            float3 sdfPos = (-distance) * currPlane.xyz; //r6
+            
+            //friction model
+            float3 deltaPos = currPos - oldPos; //r7
+            float deltaX = dot(deltaPos, currPlane.xyz); //r1.w
+            float3 deltaDistane = (-deltaX) * currPlane.xyz + deltaPos; //r4.xyz=-r1.w *r4.xyz(n)+r7    deltaX
+            float deltaLength = dot(deltaDistane, deltaDistane); //r1.w
+            [flatten]
+            if (deltaLength < (g_StaticFriction * distance))        //|deltaX|<u_s*disctance
+            {
+                sdfPos -= deltaDistane;
+            }
+            else
+            {
+                float dynamicFriction = min((-distance) * 0.01f * rsqrt(deltaLength), 1.0f); //
+                sdfPos -= dynamicFriction * (deltaDistane);
+            }
+            currPos += sdfPos;
+        }
     }
-    currPos += solverContactPos;
     
     g_UpdatedPosition[DTid.x] = currPos;
 }

@@ -15,8 +15,8 @@ void CS( uint3 DTid : SV_DispatchThreadID )
     [unroll]
     for (i = 0; i < g_PlaneNums; ++i)
     {
-        float distance = sdfPlane(currPos, g_Plane[i].xyz, g_Plane[i].w);
-        if (distance - g_CollisionDistance < g_CollisionThreshold && count<g_MaxCollisionPlanes)
+        float distance = sdfPlane(currPos, g_Plane[i].xyz, g_Plane[i].w) - g_CollisionDistance;
+        if (distance < g_CollisionThreshold && count < g_MaxCollisionPlanes)
         {
             int index = DTid.x * g_MaxCollisionPlanes + count;
             g_CollisionPlanes[index] = g_Plane[i];

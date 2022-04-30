@@ -25,28 +25,28 @@ void GS(point FluidVertexOut input[1], inout TriangleStream<FluidGeoOut> triStre
 
     FluidGeoOut output;
 
-    output.position = float4(xmin, ymax, 0.5, 1.0);
+    output.Position = float4(xmin, ymax, 0.5, 1.0);
     output.invQ0 = invQuad0;
     output.invQ1 = invQuad1;
     output.invQ2 = invQuad2;
     output.invQ3 = invQuad3;
     triStream.Append(output);
 
-    output.position = float4(xmin, ymin, 0.5, 1.0);
+    output.Position = float4(xmin, ymin, 0.5, 1.0);
     output.invQ0 = invQuad0;
     output.invQ1 = invQuad1;
     output.invQ2 = invQuad2;
     output.invQ3 = invQuad3;
     triStream.Append(output);
 
-    output.position = float4(xmax, ymax, 0.5, 1.0);
+    output.Position = float4(xmax, ymax, 0.5, 1.0);
     output.invQ0 = invQuad0;
     output.invQ1 = invQuad1;
     output.invQ2 = invQuad2;
     output.invQ3 = invQuad3;
     triStream.Append(output);
 
-    output.position = float4(xmax, ymin, 0.5, 1.0);
+    output.Position = float4(xmax, ymin, 0.5, 1.0);
     output.invQ0 = invQuad0;
     output.invQ1 = invQuad1;
     output.invQ2 = invQuad2;

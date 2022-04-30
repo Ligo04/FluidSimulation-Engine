@@ -73,6 +73,26 @@ void GameApp::UpdateScene(float dt)
 	m_pBasicEffect->SetViewMatrix(m_pCamera->GetViewXM());
 	m_pBasicEffect->SetEyePos(m_pCamera->GetPosition());
 	m_pFluidSystem->UpdateCamera(m_pd3dImmediateContext.Get(), *m_pCamera);
+
+
+	//绘制完再更新
+	static bool isfirst = true;
+	if (isfirst)
+	{
+		isfirst = false;
+	}
+	else
+	{
+		if (m_PBFRun || m_Step)
+		{
+			//固定时间步长
+			//*******************
+			//流体系统更新
+			m_pFluidSystem->UpdateFluid(m_pd3dImmediateContext.Get(), 1.0f / 60.0f);
+			m_Step = false;
+		}
+
+	}
 }
 
 void GameApp::DrawScene()
@@ -243,12 +263,13 @@ bool GameApp::InitResource()
 	m_ParticleParmas.scale = float(m_ClientWidth) / aspect * (1.0f / (tanf(fov * 0.5f)));
 	m_ParticleParmas.color = DirectX::XMFLOAT4(0.0f,0.5f,1.0f,1.0f);
 
-	m_ParticleParmas.blurRadiusWorld = m_ParticleParmas.radius * 0.5f;
+	m_ParticleParmas.blurRadiusWorld = m_ParticleParmas.RestDistance * 0.5f * 0.5f;
 	m_ParticleParmas.blurScale = m_ParticleParmas.scale;
 	m_ParticleParmas.blurFalloff = 1.0f;
 	m_ParticleParmas.ior = 1.0f;
 	m_ParticleParmas.clipToEye = DirectX::XMFLOAT4(tanf(fov * 0.5f) * aspect, tanf(fov * 0.5f), tanf(fov * 0.5f) * aspect, tanf(fov * 0.5f) * aspect);
 	m_ParticleParmas.invTexScale = DirectX::XMFLOAT4(1.0f / m_ClientWidth, aspect / m_ClientWidth, 0.0f, 0.0f);
+	m_ParticleParmas.invViewPort = DirectX::XMFLOAT4(1.0f / m_ClientWidth, aspect / m_ClientWidth, 1.0f, 0.0f);
 	m_pFluidSystem->InitResource(m_pd3dDevice.Get(), m_pd3dImmediateContext.Get(), m_ParticleParmas, dirLight,m_ClientWidth,m_ClientHeight);
   
 	m_PBFParams.particleRadius = m_ParticleParmas.radius;
@@ -257,15 +278,23 @@ bool GameApp::InitResource()
 	m_PBFParams.subStep = 2;
 	m_PBFParams.maxSolverIterations = 3;
 	m_PBFParams.gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	m_PBFParams.sphSmoothLength = m_ParticleParmas.radius ;
+	m_PBFParams.sphSmoothLength = m_ParticleParmas.radius;
 	m_PBFParams.lambdaEps= 1000.0f; 
 	m_PBFParams.vorticityConfinement = 80.0f;
-	m_PBFParams.scorrK = 0.01f;
+	m_PBFParams.scorrK = 0.001f;
 	m_PBFParams.scorrN = 4;
-	m_PBFParams.vorticityC = 0.001f;
-	m_PBFParams.density = 6643.09717f;//(9 * 315.0f * powf(5, 3))/ (64 * powf(9, 3) * XM_PI * powf(m_PBFParams.sphSmoothLength, 3.0f));
+	m_PBFParams.vorticityC = 0.01f;
+	m_PBFParams.density = 1000.0f;//(9 * 315.0f * powf(5, 3))/ (64 * powf(9, 3) * XM_PI * powf(m_PBFParams.sphSmoothLength, 3.0f));
 	m_PBFParams.maxNeighborPerParticle= 96;
+	m_PBFParams.maxSpeed = 0.5f * m_ParticleParmas.radius * m_PBFParams.subStep / (1.0f / 60.0f);
+	m_PBFParams.maxVelocityDelta = 1.0f / (m_PBFParams.subStep * m_PBFParams.maxSpeed);
 	m_PBFParams.maxContactPlane = 6;
+	m_PBFParams.laplacianSmooth = 0.4f;
+	m_PBFParams.anisotropyScale = 1.0f;
+	m_PBFParams.anisotropyMin = 0.1f * m_ParticleParmas.radius;
+	m_PBFParams.anisotropyMax = 2.0f * m_ParticleParmas.radius;
+	m_PBFParams.staticFriction = 0.0f;
+	m_PBFParams.dynamicFriction = 0.01f;
 	m_pFluidSystem->SetFluidPBFParams(m_PBFParams);
 	// ******************
 	// 设置调试对象名
@@ -362,26 +391,6 @@ void GameApp::DrawSceneWithFluid()
 	{
 		m_pFluidSystem->DrawFluid(m_pd3dImmediateContext.Get(), m_pRenderTargetView.Get());
 	}
-
-	//绘制完再更新
-	static bool isfirst = true;
-	if (isfirst)
-	{
-		isfirst = false;
-	}
-	else
-	{
-		if (m_PBFRun || m_Step)
-		{
-			//固定时间步长
-			//*******************
-			//流体系统更新
-			m_pFluidSystem->UpdateFluid(m_pd3dImmediateContext.Get(), 1.0f / 60.0f);
-			m_Step = false;
-		}
-
-	}
-
 
 
 	//恢复原来输出合并状态

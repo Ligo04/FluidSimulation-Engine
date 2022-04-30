@@ -13,6 +13,7 @@ ComPtr<ID3D11SamplerState> RenderStates::SSPointClamp			= nullptr;
 ComPtr<ID3D11SamplerState> RenderStates::SSAnistropicWrap		= nullptr;
 ComPtr<ID3D11SamplerState> RenderStates::SSLinearWrap			= nullptr;
 ComPtr<ID3D11SamplerState> RenderStates::SSShadow				= nullptr;
+ComPtr<ID3D11SamplerState> RenderStates::SSClampWrap			= nullptr;
 
 
 ComPtr<ID3D11BlendState> RenderStates::BSAlphaToCoverage		= nullptr;
@@ -127,6 +128,16 @@ void RenderStates::InitAll(ID3D11Device * device)
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	HR(device->CreateSamplerState(&sampDesc, SSShadow.GetAddressOf()));
+
+	//采样器状态
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	HR(device->CreateSamplerState(&sampDesc, SSClampWrap.GetAddressOf()));
 	
 	// ******************
 	// 初始化混合状态

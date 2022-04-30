@@ -435,6 +435,7 @@ public:
 
 	//深度贴图
 	void SetPointSpriteDepthState(ID3D11DeviceContext* deviceContext);
+	void SeEllipsoidDepthState(ID3D11DeviceContext* deviceContext);
 	//厚度贴图
 	void SetPointSpriteThicknessState(ID3D11DeviceContext* deviceContext);
 	void SetParticleRenderState(ID3D11DeviceContext* deviceContext);
@@ -463,6 +464,7 @@ public:
 	void SetPointColor(const DirectX::XMFLOAT4& color);
 	void SetClipPosToEye(const DirectX::XMFLOAT4& clipPosToEye);
 	void SetInvTexScale(const DirectX::XMFLOAT4& invTexScale);
+	void SetInvViewPort(const DirectX::XMFLOAT4& invViewPort);
 	void SetPointRadius(float radius);
 	void SetPointScale(float scale);
 
@@ -559,9 +561,12 @@ public:
 	void SetADDDeltaPositionState();
 	void SetCalcVorticityState();
 	void SetSolverVelocitiesState();
-	void SePBFFinalizeState();
+	void SetPBFFinalizeState();
 	void SetUpdateVelocityState();
 	void SetSolverContactState();
+
+	void SetSmoothPositionState();
+	void SetCalcAnisotropyState();
 
 	void SetPlaneNums(int wallNums);
 	void SetPlane(size_t pos, const DirectX::XMFLOAT3& planePos, const DirectX::XMFLOAT3& planeNor);
@@ -592,6 +597,12 @@ public:
 	void SetMaxSpeed(float maxspeed);
 	void SetMaxVelocityDelta(float elocityDelta);
 	void SetRestituion(float restituion);
+	void SetLaplacianSmooth(float smooth);
+	void SetAnisotropyScale(float anisotropyScale);
+	void SetAnisotropyMin(float anisotropyMin);
+	void SetAnisotropyMax(float anisotropyMax);
+	void SetStaticFriction(float staticFriction);
+	void SetDynamicFriction(float dynamicFriction);
 
 
 	// 

@@ -42,6 +42,6 @@ void CS( uint3 DTid : SV_DispatchThreadID )
         deltaPos += coff_j * currGrad;
     }
     
-    deltaPos *= g_InverseDensity_0;
+    deltaPos = deltaPos * g_InverseDensity_0;
     g_DeltaPosition[DTid.x] = deltaPos;
 }

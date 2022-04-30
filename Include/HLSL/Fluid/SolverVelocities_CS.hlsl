@@ -42,7 +42,7 @@ void CS( uint3 DTid : SV_DispatchThreadID )
         }
                 
         //XSPH
-        float3 deltaVec_j = deltaVelocity * currGrad;
+        float3 deltaVec_j = deltaVelocity * WSpiky(r, g_sphSmoothLength);
         deltaTotalVec += deltaVec_j;
     }
     
@@ -54,7 +54,7 @@ void CS( uint3 DTid : SV_DispatchThreadID )
         float3 currCurl = g_Curl[DTid.x].xyz;
         float3 force = g_VorticityConfinement * cross(etaTotal, currCurl);
         
-        impulse += g_DeltaTime * force;
+        //impulse += g_DeltaTime * force;
         
         impulse += g_VorticityC * deltaTotalVec;
         
