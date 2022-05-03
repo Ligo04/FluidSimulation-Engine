@@ -12,10 +12,10 @@ float4 PS(PointGeoOut pIn) : SV_Target
         discard; //kill pixel outside circle
     }
 
-    normal.z = sqrt(1.0f - mag);
+    normal.z = -sqrt(1.0f - mag);
 
     //calc thickness
-    float temp = normal.z * 0.005f;
+    float temp = -normal.z * 0.005f;
     
-    return float4(temp, temp, temp, 1.0f);
+    return float4(temp, 0.0f, 0.0f, 1.0f);
 }

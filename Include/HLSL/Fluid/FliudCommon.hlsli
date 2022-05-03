@@ -3,6 +3,7 @@
 Texture2D<float4> g_DepthTexture : register(t0);
 Texture2D<float4> g_ThicknessTexture : register(t1);
 Texture2D<float4> g_SceneTexture : register(t2);
+
 SamplerState g_TexSampler : register(s0);
 
 static const float2 g_TexCoord[4] = { float2(0.0f, 1.0f), float2(0.0f, 0.0f), float2(1.0f, 1.0f), float2(1.0f, 0.0f) };

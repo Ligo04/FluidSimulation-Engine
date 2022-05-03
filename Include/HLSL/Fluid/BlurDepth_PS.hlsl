@@ -14,7 +14,7 @@ float4 PS(PassThoughVertexOut ptIn) : SV_Target
     
     //discontinuities between different tap counts are visible. to avoid this we 
 	//use fractional contributions between #taps = ceil(radius) and floor(radius) 
-    float radius = min(maxBlurRadius, g_BlurScale * (g_BlurRadiusWorld / -depth));
+    float radius = min(maxBlurRadius, g_BlurScale * (g_BlurRadiusWorld / depth));
     float radiusInv = 1.0f / radius;
     float taps = ceil(radius);
     float frac = taps - radius;
@@ -45,7 +45,6 @@ float4 PS(PassThoughVertexOut ptIn) : SV_Target
             sum += sample * w * g * wFrac;
             wsum += w * g * wFrac;
             count += g * wFrac;
-
         }
     }
 
@@ -56,5 +55,5 @@ float4 PS(PassThoughVertexOut ptIn) : SV_Target
     
     float blend = count / sqr(2.0f * radius + 1.0f);
     float res = lerp(depth, sum, blend);
-    return float4(res, 0.0f, 0.0f, 1.0f);
+    return float4(res, res, res, 1.0f);
 }

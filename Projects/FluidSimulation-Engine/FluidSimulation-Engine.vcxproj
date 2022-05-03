@@ -570,9 +570,11 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CS</EntryPointName>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\Include\HLSL\Fluid\%(Filename).cso</ObjectFileOutput>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CS</EntryPointName>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\Include\HLSL\Fluid\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="..\..\Include\HLSL\Fluid\SolverVelocities_CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>

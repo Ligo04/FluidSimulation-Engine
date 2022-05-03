@@ -58,7 +58,7 @@ void CS(uint GI : SV_GroupIndex, uint3 DTid : SV_DispatchThreadID
 ,uint3 Gid:SV_GroupID )
 {
     //get curr digit correspend to 4-bit LSD
-    uint digit = get4Bits(g_SrcKey[DTid.x], g_CurrIteration);
+    uint digit = get4Bits(g_cellHash[DTid.x], g_CurrIteration);
 
     //counter
     [unroll(RADIX_R)]
@@ -81,13 +81,13 @@ void CS(uint GI : SV_GroupIndex, uint3 DTid : SV_DispatchThreadID
             {
                 counter++;
             }
-            g_Counters[counterIndex] = counter;
+            g_SrcCounters[counterIndex] = counter;
         }
 
         //output prefix sum according to r
         if(digit==r)
         {
-            g_Prefix[DTid.x] = localPrefix[GI];
+            g_SrcPrefix[DTid.x] = localPrefix[GI];
         }
         
         GroupMemoryBarrierWithGroupSync();

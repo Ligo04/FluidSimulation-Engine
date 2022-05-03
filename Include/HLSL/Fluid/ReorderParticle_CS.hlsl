@@ -18,6 +18,6 @@ void CS( uint3 DTid : SV_DispatchThreadID )
 
     int pos=g_ParticleIndex[DTid.x];
     g_sortedOldPosition[DTid.x] = g_oldPosition[pos];
-    g_sortedNewPosition[DTid.x] = g_newPostion[pos];
+    g_sortedNewPosition[DTid.x] = g_PredPosition[pos];
     g_sortedVelocity[DTid.x] = g_newVelocity[pos];
 }

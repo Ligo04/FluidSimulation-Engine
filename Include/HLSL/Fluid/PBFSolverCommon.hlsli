@@ -1,4 +1,4 @@
-struct Anisortopy
+struct Anisotropy
 {
     float4 q1;
     float4 q2;
@@ -11,16 +11,15 @@ StructuredBuffer<float3> g_oldVelocity : register(t1);
 RWStructuredBuffer<float3> g_PredPosition : register(u0);
 RWStructuredBuffer<float3> g_newVelocity : register(u1);
 //reorder particle
-StructuredBuffer<float3> g_newPostion : register(t2);
-StructuredBuffer<uint> g_ParticleIndex : register(t3);
-StructuredBuffer<float3> g_Bounds : register(t4);
+StructuredBuffer<uint> g_ParticleIndex : register(t2);
+StructuredBuffer<float3> g_Bounds : register(t3);
 RWStructuredBuffer<float3> g_sortedOldPosition : register(u2);
 RWStructuredBuffer<float3> g_sortedNewPosition : register(u3);
 RWStructuredBuffer<float3> g_sortedVelocity : register(u4);
 
 //contact and collision
-StructuredBuffer<uint> g_CellStart : register(t6);
-StructuredBuffer<uint> g_CellEnd : register(t7);
+StructuredBuffer<uint> g_CellStart : register(t4);
+StructuredBuffer<uint> g_CellEnd : register(t5);
 RWStructuredBuffer<uint> g_Contacts : register(u5);
 RWStructuredBuffer<uint> g_ContactCounts : register(u6);
 RWStructuredBuffer<uint> g_CollisionCounts : register(u7);
@@ -40,12 +39,10 @@ RWStructuredBuffer<float3> g_Impulses : register(u15);
 //UpdatePosition
 StructuredBuffer<uint>  g_Particleindex:register(t8); 
 RWStructuredBuffer<float3> g_SolveredPosition:register(u16);
-RWStructuredBuffer<float3> g_SolveredVelocity:register(u17);
-
+RWStructuredBuffer<float3> g_SolveredVelocity : register(u17);
 //anisotropy
 RWStructuredBuffer<float3> g_SmoothPosition : register(u18);
-RWStructuredBuffer<float3> g_SmoothPositionOmega : register(u19);
-RWStructuredBuffer<Anisortopy> g_Anisortopy : register(u20);
+RWStructuredBuffer<Anisotropy> g_Anisortopy : register(u19);
 
 
 #define THREAD_NUM_X 256
@@ -109,40 +106,40 @@ cbuffer PBFBoundary : register(b2)
 }
 
 
-//W_poly6(r,h)=315/(64*PI*h^9) * (h^2-r^2)^3
+//W_poly6(r,h)=315/(64*PI*h^3) * (1-r^2/h^2)^3
 float WPoly6(float3 r, float h)
 {
     float radius = length(r);
     float res = 0.0f;
-    if (radius <= h)
+    if (radius <= h && radius >= 0)
     {
-        float item = dot(h, h) - dot(radius, radius);
+        float item = 1 - pow(radius / h, 2);
         res = g_Poly6Coff * pow(item, 3);
     }
     return res;
 }
 
-//W_Spiky(r,h)=15/(PI*h^6) * (h-r)^3
+//W_Spiky(r,h)=15/(PI*h^3) * (1-r/h)^6
 float WSpiky(float3 r, float h)
 {
     float radius = length(r);
     float res = 0.0f;
-    if (radius <= h)
+    if (radius <= h && radius >= 0)
     {
-        float item = h - radius;
-        res = g_SpikyCoff * pow(item, 3);
+        float item = 1 - (radius / h);
+        res = g_SpikyCoff * pow(item, 6);
     }
     return res;
 }
 
-//W_Spiky_Grad(r,h)= -45/(PI*h^6) * (h-r)^2*(r/|r|);
+//W_Spiky_Grad(r,h)= -45/(PI*h^4) * (1-r/h)^2*(r/|r|);
 float3 WSpikyGrad(float3 r, float h)
 {
     float radius = length(r);
     float3 res = float3(0.0f, 0.0f, 0.0f);
     if (radius <= h && radius > 0)
     {
-        float item = h - radius;
+        float item = 1 - (radius / h);
         res = g_SpikyGradCoff * pow(item, 2) * normalize(r);
     }
     return res;
@@ -184,11 +181,10 @@ float Wsmooth(float3 r,float h)
 {
     float radius = length(r);
     float res = 0.0f;
-    if (radius < h)
+    if (radius < h && radius > 0)
     {
         float item = radius / h;
         res = 1 - pow(item, 3);
-
     }
     return res;
 }

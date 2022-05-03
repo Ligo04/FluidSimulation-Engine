@@ -12,14 +12,14 @@ float3 dsyevc3(matrix A)
    //  A =  | d*  b   e  0 |
    //       | f*  e*  c  0 |
    //       | 0   0   0  0 |
-    float de = A._12 * A._23;
-    float dd = dot(A._12, A._12);
-    float ee = dot(A._23, A._23);
-    float ff = dot(A._13, A._13);
+    float de = A[0][1] * A[1][2];
+    float dd = dot(A[0][1], A[0][1]);
+    float ee = dot(A[1][2], A[1][2]);
+    float ff = dot(A[0][2], A[0][2]);
     
-    m = A._11 + A._22 + A._33;
-    c1 = (A._11 * A._22 + A._11 * A._33 + A._22 * A._33) - (dd + ee + ff);                        // a*b + a*c + b*c - d^2 - e^2 - f^2
-    c0 = A._33 * dd + A._11 * ee + A._22 * ff - A._11 * A._22 * A._33 - 2.0f * A._13 * de;        // c*d^2 + a*e^2 + b*f^2 - a*b*c - 2*f*d*e
+    m = A[0][0] + A[1][1] + A[2][2];
+    c1 = (A[0][0] * A[1][1] + A[0][0] * A[2][2] + A[1][1] * A[2][2]) - (dd + ee + ff); // a*b + a*c + b*c - d^2 - e^2 - f^2
+    c0 = A[2][2] * dd + A[0][0] * ee + A[1][1] * ff - A[0][0] * A[1][1] * A[2][2] - 2.0f * A[0][2] * de; // c*d^2 + a*e^2 + b*f^2 - a*b*c - 2*f*d*e
     
     float p, sqrt_p, q, c, s, phi;
     p = dot(m,m) - 3.0f * c1;
@@ -38,8 +38,7 @@ float3 dsyevc3(matrix A)
     res.x = res.y + c;
     res.y -= s;
     
-    
-    
+
     return res;
 
 }
@@ -54,18 +53,18 @@ matrix GetEigenVectors(matrix C, float3 eigenValues)
     diag[0] = float4(0.0f, 0.0f, 0.0f, 0.0f);
     diag[1] = float4(0.0f, 0.0f, 0.0f, 0.0f);
     diag[2] = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    diag[3] = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    diag[3] = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    [unroll]
     for (int i = 0; i < 3;++i)
     {
         diag._11_22_33 = float3(eigenValues[i], eigenValues[i], eigenValues[i]);
-        matrix temp = C - diag;
-        float m11 = temp[1][1] * temp[2][2] - temp[1][2] * temp[2][1];
-        float m12 = temp[1][0] * temp[2][2] - temp[1][2] * temp[2][0];
-        float m13 = temp[1][0] * temp[2][1] - temp[1][1] * temp[2][0];
+        matrix temp = diag - C;
+        float C11 = temp[1][1] * temp[2][2] - temp[1][2] * temp[2][1];
+        float C12 = temp[1][2] * temp[2][0] - temp[1][0] * temp[2][2];
+        float C13 = temp[1][0] * temp[2][1] - temp[1][1] * temp[2][0];
         
-        cofactor[i] = float4(normalize(float3(m11, m12, m13)), 0.0f);
+        cofactor[i] = float4(float3(C11, C12, C13), 0.0f);
     }
-    cofactor = transpose(cofactor);
     return cofactor;
 }
 
@@ -78,45 +77,27 @@ void CS(uint3 DTid : SV_DispatchThreadID)
     }
     
     uint prevIndex = g_Particleindex[DTid.x];
-    
-    float3 currPos = g_sortedNewPosition[DTid.x];
     float3 currSmoothPos = g_SmoothPosition[DTid.x];
-    float3 currSmoothOmega = g_SmoothPositionOmega[DTid.x];
-    
-    
-    matrix omegaMaritalTotal;
+    float3 omegaTotal = float3(0.0f, 0.0f, 0.0f);
     float wTotal = 0.0f;
     
-    matrix symmetric;
-    symmetric._11_21_31_41 = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    symmetric._12_22_32_42 = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    symmetric._13_23_33_43 = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    symmetric._14_24_34_44 = float4(0.0f, 0.0f, 0.0f, 0.0f);
     
     uint neightborCounter = g_ContactCounts[DTid.x];
     uint i;
-    for (i = 0; i < neightborCounter;++i)
+    for (i = 0; i < neightborCounter; ++i)
     {
         //get the cell particle pos
         uint neightborParticleIndex = g_Contacts[DTid.x * g_MaxNeighborPerParticle + i];
         
-        float3 neighborPos = g_sortedNewPosition[neightborParticleIndex];
-        float3 deltaPos = neighborPos - currSmoothOmega;
+        float3 neighborSmoothPos = g_SmoothPosition[neightborParticleIndex];
+        float3 deltaPos = currSmoothPos - neighborSmoothPos;
         
-        symmetric[0] = deltaPos.x * float4(deltaPos, 0.0f);
-        symmetric[1] = deltaPos.y * float4(deltaPos, 0.0f);
-        symmetric[2] = deltaPos.z * float4(deltaPos, 0.0f);
-        
-        float W_ij = Wsmooth(deltaPos,2*g_sphSmoothLength);
+        float W_ij = Wsmooth(deltaPos, g_sphSmoothLength);
         wTotal += W_ij;
-        
-        omegaMaritalTotal += W_ij * symmetric;
+        omegaTotal += W_ij * neighborSmoothPos;
     }
     
-    matrix C;
-    Anisortopy ani;
-    
-    if (neightborCounter==0)
+    if (wTotal == 0 || neightborCounter == 0)
     {
         
         float3x3 unitMatrix;
@@ -124,72 +105,101 @@ void CS(uint3 DTid : SV_DispatchThreadID)
         unitMatrix._21_22_23 = float3(0.0f, 1.0f, 0.0f);
         unitMatrix._31_32_33 = float3(0.0f, 0.0f, 1.0f);
         
+        Anisotropy ani;
         ani.q1 = float4(unitMatrix._11_12_13, g_AnisotropyMin);
         ani.q2 = float4(unitMatrix._21_22_23, g_AnisotropyMin);
         ani.q3 = float4(unitMatrix._31_32_33, g_AnisotropyMin);
 
         g_Anisortopy[prevIndex] = ani;
+        
+        return;
     }
-    else
+    
+    matrix symmetric;
+    symmetric._11_21_31_41 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    symmetric._12_22_32_42 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    symmetric._13_23_33_43 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    symmetric._14_24_34_44 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        
+    matrix covariance;
+    covariance[3] = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    for (i = 0; i < neightborCounter; ++i)
     {
-        C = omegaMaritalTotal / wTotal;
-        float3 eigenvalues = dsyevc3(C);
+        uint neightborParticleIndex = g_Contacts[DTid.x * g_MaxNeighborPerParticle + i];
         
-        if (abs(eigenvalues.x - eigenvalues.z) < FLOAT_MIN)
+        float3 neighborSmoothPos = g_SmoothPosition[neightborParticleIndex];
+        
+        float3 deltaRadius = currSmoothPos - neighborSmoothPos;
+        
+        float w_ij = Wsmooth(deltaRadius, g_sphSmoothLength);
+        
+        float3 deltaPos = neighborSmoothPos - omegaTotal / wTotal;
+        
+        symmetric[0] = float4(deltaPos.x * deltaPos, 0.0f);
+        symmetric[1] = float4(deltaPos.y * deltaPos, 0.0f);
+        symmetric[2] = float4(deltaPos.z * deltaPos, 0.0f);
+            
+        covariance += w_ij * symmetric;
+    }
+        
+    matrix C = symmetric / wTotal;
+    C[3][3] = 1.0f;
+    float detC = determinant(C);
+    float3 eigenvalues = dsyevc3(C);
+    matrix ratotion;
+    ratotion._14_24_34_44 = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    
+    [flatten]
+    if (abs(eigenvalues.x - eigenvalues.z) < FLOAT_MIN)
+    {
+        //rho_1 = rho_3
+        ratotion._11_21_31_41 = float4(1.0f, 0.0f, 0.0f,0.0f);
+        ratotion._12_22_32_42 = float4(0.0f, 1.0f, 0.0f,0.0f);
+        ratotion._13_23_33_43 = float4(0.0f, 0.0f, 1.0f,0.0f);
+    }
+    else 
+    {
+        matrix eiegnVectors = GetEigenVectors(C, eigenvalues);
+        
+        if (abs(eigenvalues.x - eigenvalues.y) > FLOAT_MIN && abs(eigenvalues.y - eigenvalues.z) < FLOAT_MIN)
         {
-            float3x3 unitMatrix;
-            unitMatrix._11_12_13 = float3(1.0f, 0.0f, 0.0f);
-            unitMatrix._21_22_23 = float3(0.0f, 1.0f, 0.0f);
-            unitMatrix._31_32_33 = float3(0.0f, 0.0f, 1.0f);
-        
-            ani.q1 = float4(unitMatrix._11_12_13, g_AnisotropyMin);
-            ani.q2 = float4(unitMatrix._21_22_23, g_AnisotropyMin);
-            ani.q3 = float4(unitMatrix._31_32_33, g_AnisotropyMin);
-
-            g_Anisortopy[prevIndex] = ani;
+            float3 v1 = eiegnVectors[0].xyz;
+            float3 v2 = float3(v1.y, -v1.x, 0.0f);
+            float3 v3 = float3(v1.xy, -(v1.x * v1.x + v1.y * v1.y) / v1.z);
+            ratotion._11_21_31_41 = float4(normalize(v1), 0.0f);
+            ratotion._12_22_32_42 = float4(normalize(v2), 0.0f);
+            ratotion._13_23_33_43 = float4(normalize(v3), 0.0f);
         }
-        else 
+        else
         {
-            matrix eigenVectors = GetEigenVectors(C, eigenvalues);
-            
-            
-            eigenvalues.y = max(eigenvalues.y, eigenvalues.x / 4);
-            eigenvalues.z = max(eigenvalues.z, eigenvalues.x / 4);
-            
-            matrix diag;
-            diag[0] = float4(1.0f / eigenvalues.x, 0.0f, 0.0f, 0.0f);
-            diag[1] = float4(0.0f, 1.0f / eigenvalues.x, 0.0f, 0.0f);
-            diag[2] = float4(0.0f, 0.0f, 1.0f / eigenvalues.x, 0.0f);
-            diag[3] = float4(0.0f, 0.0f, 0.0f, 0.0f);
-           
-            
-          
-            matrix G = (1.0f / (2 * g_sphSmoothLength)) * eigenVectors * diag * transpose(eigenVectors);
-            
-            G = G * g_AnisotropyScale;
-            
-            ani.q1.w = clamp(G[0][0], g_AnisotropyMin, g_AnisotropyMax);
-            ani.q2.w = clamp(G[1][1], g_AnisotropyMin, g_AnisotropyMax);
-            ani.q3.w = clamp(G[2][2], g_AnisotropyMin, g_AnisotropyMax);
-        
-            g_Anisortopy[prevIndex] = ani;
-            
-            if (abs(eigenvalues.x - eigenvalues.y) > FLOAT_MIN && abs(eigenvalues.y - eigenvalues.z) < FLOAT_MIN)
-            {
-                float3 v1 = eigenVectors._11_21_31;
-            }
-            else
-            {
-                float3 v1 = eigenVectors._11_21_31;
-                float3 v3 = eigenVectors._13_23_33;
-                v3 = v3 - v1 * dot(v1, v3);
-                float3 v2 = cross(v1, v3);
-                ani.q1.xyz = normalize(v1);
-                ani.q2.xyz = normalize(v2);
-                ani.q3.xyz = normalize(v3);
-            }
-            
-            g_Anisortopy[prevIndex] = ani;
+            float3 v1 = eiegnVectors[0].xyz;
+            float3 v3 = eiegnVectors[2].xyz;
+            v3 = v3 - v1 * dot(v1, v3);
+            float3 v2 = cross(v1, v3);
+            ratotion._11_21_31_41 = float4(normalize(v1), 0.0f);
+            ratotion._12_22_32_42 = float4(normalize(v2), 0.0f);
+            ratotion._13_23_33_43 = float4(normalize(v3), 0.0f);
         }
     }
+    ratotion[3][3] = 1.0f;
+    
+    eigenvalues.y = max(eigenvalues.y, eigenvalues.x / 4);
+    eigenvalues.z = max(eigenvalues.z, eigenvalues.x / 4);
+    
+    matrix diag;
+    diag[0] = float4(1 / eigenvalues.x, 0.0f, 0.0f, 0.0f);
+    diag[1] = float4(0.0f, 1 / eigenvalues.y, 0.0f, 0.0f);
+    diag[2] = float4(0.0f, 0.0f, 1 / eigenvalues.z, 0.0f);
+    diag[3] = float4(0.0f, 0.0f, 0.0f, 1.0f);
+            
+    matrix anisotroMatrix;      //G matrix
+    anisotroMatrix = (1 / g_sphSmoothLength) * ratotion * (1 / 1400.0f) * diag * transpose(ratotion);
+    
+    Anisotropy ani;
+    
+    ani.q1 = float4(normalize(anisotroMatrix._11_21_31), clamp(sqrt(anisotroMatrix[0][0]) * g_AnisotropyScale, g_AnisotropyMin, g_AnisotropyMax));
+    ani.q2 = float4(normalize(anisotroMatrix._12_22_32), clamp(sqrt(anisotroMatrix[1][1]) * g_AnisotropyScale, g_AnisotropyMin, g_AnisotropyMax));
+    ani.q3 = float4(normalize(anisotroMatrix._13_23_33), clamp(sqrt(anisotroMatrix[2][2]) * g_AnisotropyScale, g_AnisotropyMin, g_AnisotropyMax));
+
+    g_Anisortopy[prevIndex] = ani;
 }

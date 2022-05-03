@@ -47,10 +47,11 @@ void CS( uint3 DTid : SV_DispatchThreadID )
                 {
                     //get the cell particle pos
                     float3 neighborPartclePos = g_sortedNewPosition[index];
-                    float3 distance = neighborPartclePos - currPos;
-                    float distancesq = sqr(distance);
-                    if (distancesq < g_ParticleRadiusSq && distancesq > 0.0f)
+                    float3 distance = currPos - neighborPartclePos;
+                    float distancesq = dot(distance, distance);
+                    if (distancesq < g_ParticleRadiusSq)
                     {
+                        //con
                         int contactsIndex = DTid.x * g_MaxNeighborPerParticle + neighborCount;
                         g_Contacts[contactsIndex] = index;
                         neighborCount++;

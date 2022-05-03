@@ -21,7 +21,7 @@ void CS( uint3 DTid : SV_DispatchThreadID )
     float gradSum_j = 0;
     
     uint i = 0;
-    for (i = 0; i < neightborCount;++i)
+    for (i = 0; i < neightborCount; ++i)
     {
          //get the cell particle pos
         uint neightborParticleIndex = g_Contacts[DTid.x * g_MaxNeighborPerParticle + i];
@@ -38,11 +38,11 @@ void CS( uint3 DTid : SV_DispatchThreadID )
         {
             gradSum_j += dot(currGrad, currGrad);
         }
+        
     }
     
 
     g_Density[DTid.x] = density;
-    
     float gradSumTotal = gradSum_j + dot(gradSum_i, gradSum_i);
     // evaluate density constraint
     float constraint = max(density * g_InverseDensity_0 - 1.0f, 0.0f);

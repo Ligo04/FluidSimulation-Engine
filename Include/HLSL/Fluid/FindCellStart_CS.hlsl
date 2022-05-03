@@ -9,12 +9,12 @@ void CS( uint3 DTid : SV_DispatchThreadID,uint GI:SV_GroupIndex )
     uint hashValue = 0;
     if (DTid.x < g_ParticleNums)
     {
-        hashValue = g_SrcKey[DTid.x];
+        hashValue = g_cellHash[DTid.x];
         sharedHash[GI + 1] = hashValue;
 
         if (GI == 0 && DTid.x > 0)
         {
-            sharedHash[0] = g_SrcKey[DTid.x - 1];
+            sharedHash[0] = g_cellHash[DTid.x - 1];
         }
     }
 

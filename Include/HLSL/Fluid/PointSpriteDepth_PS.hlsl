@@ -17,7 +17,7 @@ float4 PS(PointGeoOut pIn) : SV_Target
     //calculate depth
     float4 pixelPos = float4(pIn.PosV + normal * g_PointRadius, 1.0f);
     float4 clipSpacePos = mul(pixelPos, g_Proj);
-    float fragDepth = - clipSpacePos.z / clipSpacePos.w;
+    float fragDepth =  clipSpacePos.z / clipSpacePos.w;
 
     return float4(fragDepth, fragDepth, fragDepth, 1.0f);
 }

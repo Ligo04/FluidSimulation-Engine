@@ -30,8 +30,43 @@ public:
 private:
 	bool InitResource();
 	void DrawSceneWithFluid();
+	void CreateParticle(ID3D11Device* device, DirectX::XMFLOAT3 lower, DirectX::XMINT3 dim, float radius, float jitter);
+
+
+private :
+
+	DirectX::XMFLOAT3 RandomUnitVector();
+	void RandInit()
+	{
+		seed1 = 315645664;
+		seed2 = seed1 ^ 0x13ab45fe;
+	}
+
+	inline uint32_t Rand()
+	{
+		seed1 = (seed2 ^ ((seed1 << 5) | (seed1 >> 27))) ^ (seed1 * seed2);
+		seed2 = seed1 ^ ((seed2 << 12) | (seed2 >> 20));
+
+		return seed1;
+	}
+	inline float Randf()
+	{
+		uint32_t value = Rand();
+		uint32_t limit = 0xffffffff;
+
+		return (float)value * (1.0f / (float)limit);
+	}
+
+	inline float Randf(float max)
+	{
+		return Randf() * max;
+	}
 
 private:
+
+	uint32_t seed1;
+	uint32_t seed2;
+
 	ObjReader m_ObjReader;
 
 	std::vector<GameObject> m_Walls;							//墙体
@@ -49,6 +84,11 @@ private:
 	FluidRender::ParticleParams m_ParticleParmas;			   //粒子的参数
 	PBFSolver::PBFParams m_PBFParams;							//
 
+
+	std::vector<DirectX::XMFLOAT3> m_ParticlePos;
+	std::vector<DirectX::XMFLOAT3> m_ParticleVec;
+	std::vector<UINT> m_ParticleIndex;
+	
 
 	bool m_DebugDepth = false;
 	bool m_PBFRun = true;

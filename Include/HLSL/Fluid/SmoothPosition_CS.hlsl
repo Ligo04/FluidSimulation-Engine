@@ -22,23 +22,23 @@ void CS(uint3 DTid : SV_DispatchThreadID)
         float3 neighborPartclePos = g_sortedNewPosition[neightborParticleIndex];
         
         float3 deltaPos = currPos - neighborPartclePos;
-        float W_ij = Wsmooth(deltaPos, 2 * g_sphSmoothLength);
+        float W_ij = Wsmooth(deltaPos, g_sphSmoothLength);
         wTotal += W_ij;
+        //wij *x_j
         smoothNeighPos += W_ij * neighborPartclePos;
     }
 
-    float3 smoothPos = currPos;
-    
-    
-    if (neightborCounter!=0)
+    float3 smoothPos = 0.0f;
+    if (wTotal != 0)
     {
         smoothNeighPos = smoothNeighPos / wTotal;
-    
-        smoothPos = (1 - g_LaplacianSmooth) * currPos + g_LaplacianSmooth * smoothNeighPos;
+        
+        float smooth = min(wTotal / 3.50f, 1.0f) * g_LaplacianSmooth;
+        
+        smoothPos = (1 - smooth) * currPos + smooth * smoothNeighPos;
     }
 
   
     g_SmoothPosition[DTid.x] = smoothPos;
-    g_SmoothPositionOmega[DTid.x] = smoothNeighPos;
 }
     

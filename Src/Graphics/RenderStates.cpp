@@ -8,6 +8,7 @@ ComPtr<ID3D11RasterizerState> RenderStates::RSNoCull			= nullptr;
 ComPtr<ID3D11RasterizerState> RenderStates::RSWireframe			= nullptr;
 ComPtr<ID3D11RasterizerState> RenderStates::RSCullClockWise		= nullptr;
 ComPtr<ID3D11RasterizerState> RenderStates::RSDepth				= nullptr;
+ComPtr<ID3D11RasterizerState> RenderStates::RSNoCullWithFrontCCW = nullptr;
 
 ComPtr<ID3D11SamplerState> RenderStates::SSPointClamp			= nullptr;
 ComPtr<ID3D11SamplerState> RenderStates::SSAnistropicWrap		= nullptr;
@@ -79,6 +80,15 @@ void RenderStates::InitAll(ID3D11Device * device)
 	rasterizerDesc.DepthBiasClamp = 0.0f;
 	rasterizerDesc.SlopeScaledDepthBias = 1.0f;
 	HR(device->CreateRasterizerState(&rasterizerDesc, RSDepth.GetAddressOf()));
+
+
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_NONE;
+	rasterizerDesc.FrontCounterClockwise = true;
+	rasterizerDesc.DepthBias = 0.0f;
+	rasterizerDesc.SlopeScaledDepthBias = 0.0f;
+	rasterizerDesc.DepthClipEnable = true;
+	HR(device->CreateRasterizerState(&rasterizerDesc, RSNoCullWithFrontCCW.GetAddressOf()));
 
 	// ******************
 	// 初始化采样器状态
@@ -156,7 +166,7 @@ void RenderStates::InitAll(ID3D11Device * device)
 	// Color = SrcAlpha * SrcColor + (1 - SrcAlpha) * DestColor 
 	// Alpha = SrcAlpha
 	blendDesc.AlphaToCoverageEnable = false;
-	blendDesc.IndependentBlendEnable = false;
+	blendDesc.IndependentBlendEnable = true;
 	rtDesc.BlendEnable = true;
 	rtDesc.SrcBlend = D3D11_BLEND_SRC_ALPHA;
 	rtDesc.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;

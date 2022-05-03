@@ -1,6 +1,12 @@
 #include "FliudCommon.hlsli"
 
-float4 PS(FluidGeoOut input) : SV_TARGET
+struct PSOUT
+{
+    float4 res : SV_TARGET;
+    float depthOut : SV_Depth;
+};
+
+PSOUT PS(FluidGeoOut input)
 {
     //const float3 invViewport = gParams.invViewport;
     const float4 position = input.Position;
@@ -30,11 +36,19 @@ float4 PS(FluidGeoOut input) : SV_TARGET
     {
         discard;
     }
-	{
-        float3 eyePos = viewDir.xyz * minT;
-        float4 ndcPos = mul(float4(eyePos, 1.0),g_Proj);
-        ndcPos.z /= ndcPos.w;
+    
+    float3 eyePos = viewDir.xyz * minT;
+    ndcPos = mul(float4(eyePos, 1.0), g_Proj);
+    ndcPos.z /= ndcPos.w;
+        
+    if (ndcPos.z<0.0f)
+    {
+        discard;
 
-        return float4(-eyePos.z, eyePos.z, eyePos.z, ndcPos.z);
     }
+    PSOUT pOut;
+    pOut.depthOut = ndcPos.z;
+        
+    pOut.res = float4(eyePos.z, eyePos.z, eyePos.z, 1.0f);
+    return pOut;
 }

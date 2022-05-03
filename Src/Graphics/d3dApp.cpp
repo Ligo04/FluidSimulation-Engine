@@ -132,6 +132,7 @@ void D3DApp::OnResize()
 	
 	// 释放渲染管线输出用到的相关资源
 	// 重设交换链并且重新创建渲染目标视图
+	m_pRenderTargetView.Reset();
 	ComPtr<ID3D11Texture2D> backBuffer;
 	HR(m_pSwapChain->ResizeBuffers(1, m_ClientWidth, m_ClientHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 	HR(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
@@ -147,7 +148,7 @@ void D3DApp::OnResize()
 	depthStencilDesc.Height = m_ClientHeight;
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	depthStencilDesc.SampleDesc.Count = 1;
 	depthStencilDesc.SampleDesc.Quality = 0;
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;

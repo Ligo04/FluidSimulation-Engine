@@ -20,18 +20,18 @@ void CS( uint3 DTid : SV_DispatchThreadID )
     {
         int index = DTid.x * g_MaxCollisionPlanes + i;
         float4 currPlane = g_CollisionPlanes[index];
-        float distance = sdfPlane(currPos, currPlane.xyz, currPlane.w) - g_CollisionDistance; //r3.w
+        float distance = sdfPlane(currPos, currPlane.xyz, currPlane.w) - g_CollisionDistance; //d
         if (distance < 0.0f)
         {
-            float3 sdfPos = (-distance) * currPlane.xyz; //r6
+            float3 sdfPos = (-distance) * currPlane.xyz; 
             
             //friction model
-            float3 deltaPos = currPos - oldPos; //r7
-            float deltaX = dot(deltaPos, currPlane.xyz); //r1.w
-            float3 deltaDistane = (-deltaX) * currPlane.xyz + deltaPos; //r4.xyz=-r1.w *r4.xyz(n)+r7    deltaX
-            float deltaLength = dot(deltaDistane, deltaDistane); //r1.w
+            float3 deltaPos = currPos - oldPos;
+            float deltaX = dot(deltaPos, currPlane.xyz);
+            float3 deltaDistane = (-deltaX) * currPlane.xyz + deltaPos; //DeltaX 
+            float deltaLength = dot(deltaDistane, deltaDistane);
             [flatten]
-            if (deltaLength < (g_StaticFriction * distance))        //|deltaX|<u_s*disctance
+            if (deltaLength < (g_StaticFriction * distance))        //|deltaX|< u_s*disctance
             {
                 sdfPos -= deltaDistane;
             }

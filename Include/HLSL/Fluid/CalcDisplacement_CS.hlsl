@@ -26,10 +26,10 @@ void CS( uint3 DTid : SV_DispatchThreadID )
     uint i = 0;
     for (i = 0; i < neightborCount; ++i)
     {
-         //get the cell particle pos
+        //get the cell particle pos
         uint neightborParticleIndex = g_Contacts[DTid.x * g_MaxNeighborPerParticle + i];
         float neighborLambda = g_LambdaMultiplier[neightborParticleIndex];
-       //get the cell particle pos
+        //get the cell particle pos
         float3 neighborParticlePos = g_sortedNewPosition[neightborParticleIndex];
         //r=p_i-p_j
         float3 r = currPos - neighborParticlePos;
