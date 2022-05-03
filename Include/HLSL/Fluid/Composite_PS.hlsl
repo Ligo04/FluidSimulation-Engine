@@ -47,7 +47,8 @@ PixelOut PS(PassThoughVertexOut ptIn)
     //float3 normal = normalize(cross(dx, dy));
     
     float3 normal = normalize(cross(dx, dy));
-    pOut.normal = float4(normal * 0.5 + 0.5f, 1.0f);
+
+    pOut.normal = float4(-normal * 0.5f + 0.5f, 1.0f); 
     
     float3 n = normal;
     float3 h = normalize(v + l);
