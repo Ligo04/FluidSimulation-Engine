@@ -31,7 +31,7 @@ void CS( uint3 DTid : SV_DispatchThreadID )
             float3 deltaDistane = (-deltaX) * currPlane.xyz + deltaPos; //DeltaX 
             float deltaLength = dot(deltaDistane, deltaDistane);
             [flatten]
-            if (deltaLength < (g_StaticFriction * distance))        //|deltaX|< u_s*disctance
+            if (deltaLength <= (g_StaticFriction * distance))        //|deltaX|< u_s*disctance
             {
                 sdfPos -= deltaDistane;
             }

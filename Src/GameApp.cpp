@@ -163,9 +163,6 @@ bool GameApp::InitResource()
 	std::wstring texturePath= L"..\\..\\Assets\\Texture\\";
 
 
-
-
-
 	// ******************
 	// 初始化天空盒相关
 	//
@@ -184,8 +181,8 @@ bool GameApp::InitResource()
 	//
 	DirectionalLight dirLight{};
 	dirLight.ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	dirLight.diffuse = XMFLOAT4(0.75f, 0.75f, 0.75f, 1.0f);
-	dirLight.specular = XMFLOAT4(0.45f, 0.45f, 0.45f, 1.0f);
+	dirLight.diffuse = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	dirLight.specular = XMFLOAT4(0.6f, 0.6f, 0.45f, 1.0f);
 	DirectX::XMFLOAT3 dir = XMFLOAT3(-5.0f, -15.0f,-7.5f);
 	//DirectX::XMFLOAT3 dir = XMFLOAT3(0.0f, -1.0f, 0.0f);
 	XMStoreFloat3(&dir,XMVector3Normalize(XMLoadFloat3(&dir)));
@@ -208,7 +205,7 @@ bool GameApp::InitResource()
 	{
 		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,0.0f)},        //下面(地面)
 		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(-XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,2.5f)}, //前面
-		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,-0.0f)},    //后面
+		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(XM_PI / 2.0f,0.0f,0.0f),XMFLOAT3(0.0f,0.0f,-0.1f)},    //后面
 		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,-XM_PI / 2.0f),XMFLOAT3(-0.1f,0.0f,0.0f)},  //左侧
 		Transform{XMFLOAT3(1.0f,1.0f,1.0f),XMFLOAT3(0.0f,0.0f,XM_PI / 2.0f),XMFLOAT3(5.5f,0.0f,0.0f)},      //右侧
 	};
@@ -233,8 +230,8 @@ bool GameApp::InitResource()
 	XMStoreFloat4(&color, DirectX::Colors::Blue);
 	model1.SetMesh(m_pd3dDevice.Get(), Geometry::CreatePlane(XMFLOAT2(50.0f, 50.0f), XMFLOAT2(2.0f, 2.0f), color));
 	model1.modelParts[0].material.ambient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	model1.modelParts[0].material.diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	model1.modelParts[0].material.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 8.0f);
+	model1.modelParts[0].material.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	model1.modelParts[0].material.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 8.0f);
 	model1.modelParts[0].material.reflect = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	HR(CreateWICTextureFromFile(m_pd3dDevice.Get(), (texturePath + L"floor.png").c_str(), nullptr,
 		model1.modelParts[0].texDiffuse.GetAddressOf()));
@@ -281,6 +278,8 @@ bool GameApp::InitResource()
 	m_ParticleParmas.blurScale = m_ParticleParmas.scale;
 	m_ParticleParmas.blurFalloff = 1.0f;
 	m_ParticleParmas.ior = 1.0f;
+
+
 	m_ParticleParmas.clipToEye = DirectX::XMFLOAT4(tanf(fov * 0.5f) * aspect, tanf(fov * 0.5f), tanf(fov * 0.5f) * aspect, tanf(fov * 0.5f) * aspect);
 	m_ParticleParmas.invTexScale = DirectX::XMFLOAT4(1.0f / m_ClientWidth, aspect / m_ClientWidth, 0.0f, 0.0f);
 	m_ParticleParmas.invViewPort = DirectX::XMFLOAT4(1.0f / m_ClientWidth, aspect / m_ClientWidth, 1.0f, 0.0f);
@@ -302,8 +301,9 @@ bool GameApp::InitResource()
 	m_PBFParams.gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
 	m_PBFParams.sphSmoothLength = m_ParticleParmas.radius;
 	m_PBFParams.lambdaEps= 1000.0f; 
-	m_PBFParams.vorticityConfinement = 80.0f;
+	m_PBFParams.vorticityConfinement = 40.0f;
 	m_PBFParams.vorticityC = 0.001f;
+	m_PBFParams.delatQ = 0.1f;
 	m_PBFParams.scorrK = 0.001f;
 	m_PBFParams.scorrN = 4;
 	m_PBFParams.density = 315.0f / (64.0f * DirectX::XM_PI * powf(m_PBFParams.sphSmoothLength, 3.0f)) * (6643.09717f / 4774.64795f);
@@ -346,7 +346,6 @@ void GameApp::DrawSceneWithFluid()
 			m_PBFRun = false;
 		}
 		ImGui::Checkbox("Run", &m_PBFRun);
-
 		if (ImGui::Button("Next"))
 		{
 			m_Step = true;
@@ -357,28 +356,36 @@ void GameApp::DrawSceneWithFluid()
 		ImGui::SliderInt("##0", &m_PBFParams.subStep, 1, 10, "");
 		ImGui::Text("MaxSolverIterations: %d", m_PBFParams.maxSolverIterations);
 		ImGui::SliderInt("##1", &m_PBFParams.maxSolverIterations, 1, 10, "");
-		ImGui::InputFloat3("Gravity", (float*)&m_PBFParams.gravity);
+		ImGui::Text("Gravity");
+		ImGui::SliderFloat("Gravity X", (float*)&m_PBFParams.gravity.x, -20.0f, 20.0f);
+		ImGui::SliderFloat("Gravity Y", (float*)&m_PBFParams.gravity.y, -20.0f, 20.0f);
+		ImGui::SliderFloat("Gravity Z", (float*)&m_PBFParams.gravity.z, -20.0f, 20.0f);
 		ImGui::Text("LambdaEps: %f", m_PBFParams.lambdaEps);
-		ImGui::SliderFloat("##2", &m_PBFParams.lambdaEps, 0, 5000, "");
+		ImGui::SliderFloat("##2", &m_PBFParams.lambdaEps, 0, 2000.0f, "");
+		ImGui::Text("corrK: %f", m_PBFParams.scorrK);
+		ImGui::SliderFloat("##10", &m_PBFParams.scorrK, 0, 0.1f, "");
+		ImGui::Text("Fixed distance: %f", m_PBFParams.delatQ);
+		ImGui::SliderFloat("DeltaQ", &m_PBFParams.delatQ, 0, 0.3f, "");
 		ImGui::Text("Viscosity Confinement: %f", m_PBFParams.vorticityConfinement);
-		ImGui::SliderFloat("##3", &m_PBFParams.vorticityConfinement, 0, 120, "");
+		ImGui::SliderFloat("##3", &m_PBFParams.vorticityConfinement, 0, 120.0f, "");
 		ImGui::Text("Viscosity: %f", m_PBFParams.vorticityC);
-		ImGui::SliderFloat("##4", &m_PBFParams.vorticityC, 0, 120, "");
+		ImGui::SliderFloat("##4", &m_PBFParams.vorticityC, 0, 120.0f, "");
 	}
 	ImGui::End();
 
 
-
 	m_pFluidSystem->TickRender(m_pd3dImmediateContext.Get(), m_ParticleParmas,
 		*m_pCamera, m_pRenderTargetView.Get(), m_pDepthStencilView.Get(), m_DrawFluid);
-
 	if (m_DebugDepth)
 	{
 		m_pFluidSystem->TickDebugTextrue(m_pd3dImmediateContext.Get(), m_ParticleParmas, AspectRatio(), m_DrawFluid);
 	}
-
-
 	m_pd3dImmediateContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
+
+	if (m_PBFRun || m_Step)
+	{
+		m_pFluidSystem->TickGpuTimes();
+	}
 
 	ImGui::Render();
 }

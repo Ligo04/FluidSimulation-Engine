@@ -51,7 +51,7 @@ void CS( uint3 DTid : SV_DispatchThreadID )
                     float distancesq = dot(distance, distance);
                     if (distancesq < g_ParticleRadiusSq)
                     {
-                        //con
+                       //contact
                         int contactsIndex = DTid.x * g_MaxNeighborPerParticle + neighborCount;
                         g_Contacts[contactsIndex] = index;
                         neighborCount++;

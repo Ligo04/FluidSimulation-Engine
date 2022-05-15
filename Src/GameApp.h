@@ -94,7 +94,7 @@ private:
 	bool m_PBFRun = true;
 	bool m_Step = false;
 	bool m_FirstRun = true;
-	bool m_DrawFluid = false;
+	bool m_DrawFluid = true;
 
 };
 

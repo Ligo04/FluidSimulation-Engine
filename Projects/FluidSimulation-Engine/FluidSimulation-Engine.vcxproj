@@ -45,6 +45,7 @@
     <ClCompile Include="..\..\Src\Utils\d3dUtil.cpp" />
     <ClCompile Include="..\..\Src\Utils\DXTrace.cpp" />
     <ClCompile Include="..\..\Src\Utils\GameTimer.cpp" />
+    <ClCompile Include="..\..\Src\Utils\GpuTimer.cpp" />
     <ClCompile Include="..\..\Src\Utils\Keyboard.cpp" />
     <ClCompile Include="..\..\Src\Utils\Model.cpp" />
     <ClCompile Include="..\..\Src\Utils\Mouse.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="..\..\Include\Utils\DXTrace.h" />
     <ClInclude Include="..\..\Include\Utils\GameTimer.h" />
     <ClInclude Include="..\..\Include\Utils\Geometry.h" />
+    <ClInclude Include="..\..\Include\Utils\GpuTimer.h" />
     <ClInclude Include="..\..\Include\Utils\Keyboard.h" />
     <ClInclude Include="..\..\Include\Utils\Model.h" />
     <ClInclude Include="..\..\Include\Utils\Mouse.h" />

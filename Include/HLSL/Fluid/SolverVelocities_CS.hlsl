@@ -48,9 +48,9 @@ void CS( uint3 DTid : SV_DispatchThreadID )
     
     float3 impulse = float3(0.0f, 0.0f, 0.0f);
     //vorticity Confinement
-    if (density > 0.0f && g_VorticityConfinement > 0.0f)
+    if (length(etaTotal) > 0.0f && g_VorticityConfinement > 0.0f && density>0.0f)
     {
-        float epsilon = pow(g_DeltaTime,2) * g_InverseDensity_0 * g_VorticityConfinement;
+        float epsilon = g_DeltaTime * g_DeltaTime * g_InverseDensity_0 * g_VorticityConfinement;
         
         float3 currCurl = g_Curl[DTid.x].xyz;       //r2
         

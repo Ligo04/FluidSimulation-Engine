@@ -85,7 +85,7 @@ void RenderStates::InitAll(ID3D11Device * device)
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.CullMode = D3D11_CULL_NONE;
 	rasterizerDesc.FrontCounterClockwise = true;
-	rasterizerDesc.DepthBias = 0.0f;
+	rasterizerDesc.DepthBias = 0;
 	rasterizerDesc.SlopeScaledDepthBias = 0.0f;
 	rasterizerDesc.DepthClipEnable = true;
 	HR(device->CreateRasterizerState(&rasterizerDesc, RSNoCullWithFrontCCW.GetAddressOf()));

@@ -569,7 +569,7 @@ public:
 	void SetCalcAnisotropyState();
 
 	void SetPlaneNums(int wallNums);
-	void SetPlane(size_t pos, const DirectX::XMFLOAT3& planePos, const DirectX::XMFLOAT3& planeNor);
+	void SetPlane(size_t pos, const DirectX::XMFLOAT4& plane);
 
 	void SetParticleNums(UINT particleNums);
 	void SetCollisionDistance(float distance);

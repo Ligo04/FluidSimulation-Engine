@@ -179,6 +179,9 @@
     <ClCompile Include="..\..\Src\Effect\PBFSolverEffect.cpp">
       <Filter>Src\Effect</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Src\Utils\GpuTimer.cpp">
+      <Filter>Src\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Src\GameApp.h">
@@ -270,6 +273,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\Graphics\Buffer.h">
       <Filter>Include\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Utils\GpuTimer.h">
+      <Filter>Include\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

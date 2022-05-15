@@ -137,7 +137,7 @@ float3 WSpikyGrad(float3 r, float h)
 {
     float radius = length(r);
     float3 res = float3(0.0f, 0.0f, 0.0f);
-    if (radius <= h && radius > 0)
+    if (radius < h && radius > 0)
     {
         float item = 1 - (radius / h);
         res = g_SpikyGradCoff * pow(item, 2) * normalize(r);

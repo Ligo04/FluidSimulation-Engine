@@ -10,20 +10,20 @@ void CS( uint3 DTid : SV_DispatchThreadID )
         return;
     }
 
+   //curr neighbor count
+    uint neightborCount = g_ContactCounts[DTid.x];
+    
     //curr particle pos
     float3 currPos = g_sortedNewPosition[DTid.x];
     float3 currVec = g_UpdatedVelocity[DTid.x];
-   //curr neighbor count
-    uint neightborCount = g_ContactCounts[DTid.x];
-
     float3 currOmega = float3(0.0f, 0.0f, 0.0f);
     
     uint i = 0;
     for (i = 0; i < neightborCount; ++i)
     {
-         //get the cell particle pos
+        //get the cell particle pos
         uint neightborParticleIndex = g_Contacts[DTid.x * g_MaxNeighborPerParticle + i];
-       //get the cell particle pos
+        //get the cell particle pos
         float3 neighborParticlePos = g_sortedNewPosition[neightborParticleIndex];
         //r=p_i-p_j
         float3 r = currPos - neighborParticlePos;
@@ -35,13 +35,8 @@ void CS( uint3 DTid : SV_DispatchThreadID )
         currOmega += omega_j;
     }
     
-    if (neightborCount==0)
-    {
-        g_Curl[DTid.x] = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    else
-    {
-        float curlLength = length(currOmega);
-        g_Curl[DTid.x] = float4(currOmega.xyz, curlLength);
-    }
+  
+    float curlLength = length(currOmega);
+    g_Curl[DTid.x] = float4(currOmega.xyz, curlLength);
+    
 }

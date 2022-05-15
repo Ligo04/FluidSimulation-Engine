@@ -39,7 +39,7 @@ PixelOut PS(PassThoughVertexOut ptIn)
  
     float4 worldPos = mul(float4(eyePos, 1.0), g_WorldViewInv);
 
-    float shadow = 0.25f;
+    float shadow = 0.1f;
 	
     float3 l = mul(float4(g_DirLight[0].Direction,0.0f),g_WorldView).xyz;
     float3 v = -normalize(eyePos);
@@ -55,7 +55,7 @@ PixelOut PS(PassThoughVertexOut ptIn)
 
 
     float3 skyColor = float3(0.1, 0.2, 0.3) * 1.2;
-    float3 groundColor = float3(0.1, 0.1, 0.25);
+    float3 groundColor = float3(0.1, 0.1, 0.3);
 
     float fresnel = 0.1 + (1.0 - 0.1) * cube(1.0 - max(dot(n, v), 0.0));
 
