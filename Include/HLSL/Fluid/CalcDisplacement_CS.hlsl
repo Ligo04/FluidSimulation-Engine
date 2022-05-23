@@ -1,10 +1,5 @@
 #include "PBFSolverCommon.hlsli"
 
-// StructuredBuffer<float3> g_CurrPosition:register(t4);
-// StructuredBuffer<float> g_CellStart:register(t5);
-// StructuredBuffer<float> g_CellEnd:register(t6);
-// RWStructuredBuffer<float> g_LambdaMultiplier:register(u5);
-// RWStructuredBuffer<float3> g_DeltaPosition:register(u6);
 
 [numthreads(THREAD_NUM_X, 1, 1)]
 void CS( uint3 DTid : SV_DispatchThreadID )
