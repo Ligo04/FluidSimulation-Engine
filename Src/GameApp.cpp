@@ -77,8 +77,7 @@ void GameApp::UpdateScene(float dt)
 
 
 	//绘制完再更新
-	static bool isfirst = true;
-	if (isfirst)
+	if (static bool isfirst = true)
 	{
 		isfirst = false;
 	}
@@ -159,8 +158,8 @@ bool GameApp::InitResource()
 	// ******************
 	// 初始化对象
 	//
-	std::wstring modelPath = L"..\\..\\Assets\\Model\\";
-	std::wstring texturePath= L"..\\..\\Assets\\Texture\\";
+	std::wstring modelPath = L"..\\Assets\\Model\\";
+	std::wstring texturePath= L"..\\Assets\\Texture\\";
 
 
 	// ******************

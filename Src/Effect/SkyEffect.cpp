@@ -76,16 +76,21 @@ bool SkyEffect::InitAll(ID3D11Device * device)
 		throw std::exception("RenderStates need to be initialized first!");
 
 	pImpl->m_pEffectHelper = std::make_unique<EffectHelper>();
+    pImpl->m_pEffectHelper->SetBinaryCacheDirectory(L"..\\shaders\\generated");
+    std::wstring shader_path = L"..\\shaders\\";
 
 	ComPtr<ID3DBlob> blob;
 	
 	// ******************
 	// 创建顶点着色器
 	//
-	std::wstring effectPath = L"..\\..\\Include\\HLSL\\";
-
-	HR(CreateShaderFromFile((effectPath + L"Sky_VS.cso").c_str(), (effectPath + L"Sky_VS.hlsl").c_str(), "VS", "vs_5_0", blob.ReleaseAndGetAddressOf()));
-	HR(pImpl->m_pEffectHelper->AddShader("Sky_VS", device, blob.Get()));
+    HR(pImpl->m_pEffectHelper->CreateShaderFromFile("Sky_VS",
+                                                      shader_path + L"Sky_VS.hlsl",
+                                                      device,
+                                                      "VS",
+                                                      "vs_5_0",
+                                                      nullptr,
+                                                      blob.ReleaseAndGetAddressOf()));
 	// 创建顶点布局
 	HR(device->CreateInputLayout(VertexPos::inputLayout, ARRAYSIZE(VertexPos::inputLayout),
 		blob->GetBufferPointer(), blob->GetBufferSize(), pImpl->m_pVertexPosLayout.GetAddressOf()));
@@ -93,9 +98,8 @@ bool SkyEffect::InitAll(ID3D11Device * device)
 	// ******************
 	// 创建像素着色器
 	//
-	HR(CreateShaderFromFile((effectPath + L"Sky_PS.cso").c_str(), (effectPath + L"Sky_PS.hlsl").c_str(), "PS", "ps_5_0", blob.ReleaseAndGetAddressOf()));
-	HR(pImpl->m_pEffectHelper->AddShader("Sky_PS", device, blob.Get()));
-
+    HR(pImpl->m_pEffectHelper->CreateShaderFromFile(
+        "Sky_PS", shader_path + L"Sky_PS.hlsl", device, "PS", "ps_5_0", nullptr, blob.ReleaseAndGetAddressOf()));
 	// ******************
 	// 创建通道
 	//

@@ -431,7 +431,7 @@ public:
 	FluidEffect& operator=(FluidEffect&& moveFrom) noexcept;
 
 	//初始化资源
-	bool Init(ID3D11Device* device, const std::wstring& effectPath);
+	bool Init(ID3D11Device* device);
 
 	//深度贴图
 	void SetPointSpriteDepthState(ID3D11DeviceContext* deviceContext);
@@ -500,7 +500,7 @@ public:
 	NeighborSearchEffect& operator=(NeighborSearchEffect&& moveFrom) noexcept;
 
 	//初始化资源
-	bool Init(ID3D11Device* device, const std::wstring& effectPath);
+	bool Init(ID3D11Device* device);
 
 	void SetCalcBoundsState();
 	void SetCalcBoundsGroupState();
@@ -547,7 +547,7 @@ public:
 	PBFSolverEffect& operator=(PBFSolverEffect&& moveFrom) noexcept;
 
 	//初始化资源
-	bool Init(ID3D11Device* device, const std::wstring& effectPath);
+	bool Init(ID3D11Device* device);
 
 	void SetInputSRVByName(LPCSTR name, ID3D11ShaderResourceView* srv);
 	void SetOutPutUAVByName(LPCSTR name, ID3D11UnorderedAccessView* uav);

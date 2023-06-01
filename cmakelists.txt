@@ -1,0 +1,68 @@
+cmake_minimum_required( VERSION 3.5 )
+project ( FluidSimulation-Engine )
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+set(CMAKE_CXX_STANDARD 17)
+add_compile_definitions(UNICODE _UNICODE)
+
+set(TARGET_NAME FluidSimulation-Engine)
+#collect file
+file(GLOB_RECURSE ENGINE_HEADERS ${PROJECT_SOURCE_DIR}/include/*h)
+file(GLOB_RECURSE ENGINE_SOURCES ${PROJECT_SOURCE_DIR}/src/*cpp)
+#shaders
+file(GLOB_RECURSE HLSL_FILES ${PROJECT_SOURCE_DIR}/shaders/*.hlsl ${PROJECT_SOURCE_DIR}/shaders/*.hlsli)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${ENGINE_HEADERS} ${ENGINE_SOURCES} ${HLSL_FILES})
+#solution folders
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMakeTargets")
+
+foreach(HLSL_FILE ${HLSL_FILES})
+
+    get_filename_component(HLSL_FDIR ${HLSL_FILE} DIRECTORY)
+    get_filename_component(HLSL_FBASENAME_WE ${HLSL_FILE} NAME_WE)
+    string(CONCAT HLSL_FNAME_WE ${HLSL_FDIR} / ${HLSL_FBASENAME_WE})
+
+    string(LENGTH ${HLSL_FBASENAME_WE} LEN_FNAME_WE)
+    math(EXPR LEN_FNAME_WE "${LEN_FNAME_WE}-2")
+    string(SUBSTRING ${HLSL_FBASENAME_WE} ${LEN_FNAME_WE} 2 ENTRY_POINT)
+    string(TOLOWER ${ENTRY_POINT} SHADER_TYPE)
+
+    if ("${SHADER_TYPE}" STREQUAL "vs") 
+        set(SHADER_TYPE "Vertex")
+    elseif("${SHADER_TYPE}" STREQUAL "hs") 
+        set(SHADER_TYPE "Hull")
+    elseif("${SHADER_TYPE}" STREQUAL "ds") 
+        set(SHADER_TYPE "Domain")
+    elseif("${SHADER_TYPE}" STREQUAL "gs") 
+        set(SHADER_TYPE "Geometry")
+    elseif("${SHADER_TYPE}" STREQUAL "ps")
+        set(SHADER_TYPE "Pixel")
+    elseif("${SHADER_TYPE}" STREQUAL "cs")
+        set(SHADER_TYPE "Compute")
+    endif()
+    set_source_files_properties(${HLSL_FILE} PROPERTIES
+                                VS_SHADER_OBJECT_FILE_NAME ${PROJECT_SOURCE_DIR}/shaders/generated/${HLSL_FBASENAME_WE}.cso
+                                VS_SHADER_TYPE ${SHADER_TYPE}
+                                VS_SHADER_MODEL 5.0
+                                VS_SHADER_ENTRYPOINT ${ENTRY_POINT}
+                                VS_SHADER_DISABLE_OPTIMIZATIONS $<$<CONFIG:Debug>:true>
+                                VS_SHADER_ENABLE_DEBUG $<$<CONFIG:Debug>:true>)
+endforeach()
+
+file(COPY shaders DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+add_executable(${TARGET_NAME} WIN32 ${ENGINE_HEADERS} ${ENGINE_SOURCES} ${HLSL_FILES})   
+target_link_libraries(${TARGET_NAME} PUBLIC d3d11.lib dxgi.lib dxguid.lib D3DCompiler.lib winmm.lib)
+
+#include 
+target_include_directories(
+  ${TARGET_NAME} 
+  PUBLIC 
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+)
+#thirdparty
+add_subdirectory(thirdParty)
+target_link_libraries(${TARGET_NAME} PUBLIC imgui)
+
+#set ouput path
+set_target_properties(${TARGET_NAME}  PROPERTIES OUTPUT_NAME "FluidSimulation-Engine")
+set_target_properties(${TARGET_NAME}  PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/bin)
+set_target_properties(${TARGET_NAME}  PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE  ${PROJECT_SOURCE_DIR}/bin)
