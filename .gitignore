@@ -364,3 +364,10 @@ MigrationBackup/
 FodyWeavers.xsd
 /build
 /.vscode
+compile_commands.json
+/vsxmake2022
+/vs2022
+/thirdParty/CMakeFiles
+/thirdParty/cmake_install.cmake
+/thirdParty/imgui.vcxproj
+/thirdParty/imgui.vcxproj.filters
