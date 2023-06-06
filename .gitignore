@@ -371,3 +371,4 @@ compile_commands.json
 /thirdParty/cmake_install.cmake
 /thirdParty/imgui.vcxproj
 /thirdParty/imgui.vcxproj.filters
+/shaders/generated

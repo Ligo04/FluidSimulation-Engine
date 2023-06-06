@@ -48,7 +48,6 @@ foreach(HLSL_FILE ${HLSL_FILES})
                                 VS_SHADER_ENABLE_DEBUG $<$<CONFIG:Debug>:true>)
 endforeach()
 
-file(COPY shaders DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 add_executable(${TARGET_NAME} WIN32 ${ENGINE_HEADERS} ${ENGINE_SOURCES} ${HLSL_FILES})   
 target_link_libraries(${TARGET_NAME} PUBLIC d3d11.lib dxgi.lib dxguid.lib D3DCompiler.lib winmm.lib)
 
@@ -61,6 +60,7 @@ target_include_directories(
 #thirdparty
 add_subdirectory(thirdParty)
 target_link_libraries(${TARGET_NAME} PUBLIC imgui)
+file(COPY ${PROJECT_SOURCE_DIR}/imgui.ini DESTINATION  ${PROJECT_SOURCE_DIR}/bin)
 
 #set ouput path
 set_target_properties(${TARGET_NAME}  PROPERTIES OUTPUT_NAME "FluidSimulation-Engine")
