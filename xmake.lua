@@ -2,12 +2,6 @@ set_xmakever("2.7.9")
 set_version("1.0.0")
 add_rules("mode.release", "mode.debug")
 
-option("enable_unity_build")
-set_values(true, false)
-set_default(true)
-set_showmenu(true)
-option_end()
-
 rule("dx_lib")
     on_load(function (target)
         target:add("syslinks","d3d11","dxgi","dxguid","D3DCompiler","winmm","kernel32","user32","gdi32","winspool","shell32","ole32","oleaut32","uuid","comdlg32","advapi32")

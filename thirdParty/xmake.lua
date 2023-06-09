@@ -2,7 +2,8 @@ set_group("thirdparty")
 target("imgui")
 _config_project({
     project_kind = "static",
-    enable_exception = true
+    enable_exception = true,
+    batch_size=8
 })
 add_includedirs("imgui", {
     public = true
