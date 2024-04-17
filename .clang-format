@@ -1,129 +1,137 @@
+# Commented out parameters are those with the same value as base LLVM style.
+# We can uncomment them if we want to change their value, or enforce the
+# chosen value in case the base style changes (last sync: Clang 14.0).
 ---
-StatementMacros: ['Meta', 'CLASS', 'REFLECTION_TYPE', 'REFLECTION_BODY']
-Language:        Cpp
-# BasedOnStyle:  Google
-AccessModifierOffset: -4
-AlignAfterOpenBracket: Align 
-AlignConsecutiveAssignments: true 
-AlignConsecutiveDeclarations: true
-AlignEscapedNewlines: DontAlign
-AlignOperands: Align
-AlignTrailingComments: true
-AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortBlocksOnASingleLine: false
-AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: All
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
-AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: Yes
-BinPackArguments: false
+### General config, applies to all languages ###
+### C++ specific config ###
+Language: Cpp
+Standard: c++17
+BasedOnStyle: LLVM
+ColumnLimit: 120
+AlignAfterOpenBracket: Align
+BreakBeforeBinaryOperators: All
+AlignOperands:   AlignAfterOperator
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+AlignConsecutiveBitFields: 
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+AlignConsecutiveDeclarations: 
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+AlignTrailingComments: 
+  Kind: Always
+  OverEmptyLines: 2
 BinPackParameters: false
-BraceWrapping:     
-  AfterClass:      true
-  AfterControlStatement: true
-  AfterEnum:       true
-  AfterFunction:   true
-  AfterNamespace:  true
-  AfterObjCDeclaration: true
-  AfterStruct:     true
-  AfterUnion:      true
-  AfterExternBlock: true
-  BeforeCatch:     true
-  BeforeElse:      true
-  IndentBraces:    false
+BinPackArguments: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortCaseLabelsOnASingleLine: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel:  True
+  AfterClass:      True
+  AfterControlStatement: Always 
+  AfterEnum:       True
+  AfterFunction:   True
+  AfterNamespace:  True
+  AfterStruct:     True
+  AfterUnion:      True
+  AfterExternBlock: True
+  BeforeCatch:     True
+  BeforeElse:      True
+  BeforeLambdaBody: false
+  BeforeWhile:     false
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
-BreakBeforeBinaryOperators: None
-BreakBeforeBraces: Custom
-BreakBeforeInheritanceComma: false
-BreakBeforeTernaryOperators: false
-BreakConstructorInitializersBeforeComma: true
+BreakBeforeConceptDeclarations: Always
+BreakInheritanceList: BeforeColon
+BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: AfterColon
-BreakAfterJavaFieldAnnotations: false
-BreakStringLiterals: true
-ColumnLimit:     120
-CommentPragmas:  '^ IWYU pragma:'
-CompactNamespaces:  false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
-ConstructorInitializerIndentWidth: 4
-ContinuationIndentWidth: 4
-Cpp11BracedListStyle: true
+QualifierAlignment: Leave
+CompactNamespaces: false
+Cpp11BracedListStyle: false
 DerivePointerAlignment: false
-DisableFormat:   false
-ExperimentalAutoDetectBinPacking: false
-FixNamespaceComments: true
-ForEachMacros:   
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
-IncludeBlocks: Preserve
-IncludeCategories: 
-  - Regex:           '^"(core/pilot_prerequisites)/'
-    Priority:        -1
-  - Regex:           '^"(core)/)'
-    Priority:        5
-  - Regex:           '^"(runtime)/)'
-    Priority:        4
-  - Regex:           '^"(client|server)/)'
-    Priority:        3
-  - Regex:           '^"(sketum)/)'
-    Priority:        2
-  - Regex:           '.*'
+IncludeBlocks:   Preserve
+IncludeCategories:
+  - Regex:           '".*"'
     Priority:        1
+  - Regex:           '^<.*\.h>'
+    Priority:        2
+  - Regex:           '^<.*'
+    Priority:        3
+IncludeIsMainRegex: '(Test)?$'
+IncludeIsMainSourceRegex: ''
+# TabWidth: 4
 IndentCaseLabels: true
-IndentWidth:     4
-IndentExternBlock: AfterExternBlock
+IndentCaseBlocks: true
+NamespaceIndentation: All
+IndentAccessModifiers: true
+# AccessModifierOffsets: -4
 IndentPPDirectives: None
-IndentWrappedFunctionNames: false
-JavaScriptQuotes: Leave
-JavaScriptWrapImports: true
-KeepEmptyLinesAtTheStartOfBlocks: true
-Language: Cpp
+IndentExternBlock: Indent
+IndentRequiresClause: false
+IndentWidth: 4
+IndentWrappedFunctionNames: True
+InsertTrailingCommas: None
+KeepEmptyLinesAtTheStartOfBlocks: false
+LambdaBodyIndentation: Signature
 MacroBlockBegin: ''
 MacroBlockEnd:   ''
 MaxEmptyLinesToKeep: 1
-NamespaceIndentation: All
-ObjCBlockIndentWidth: 2
-ObjCSpaceAfterProperty: false
-ObjCSpaceBeforeProtocolList: true
-PenaltyBreakAssignment: 2
-PenaltyBreakBeforeFirstCallParameter: 19
-PenaltyBreakComment: 300
-PenaltyBreakFirstLessLess: 120
-PenaltyBreakString: 1000
-PenaltyExcessCharacter: 1000000
-PenaltyReturnTypeOnItsOwnLine: 60
-PointerAlignment: Left
+PointerAlignment: Right
+PPIndentWidth:   -1
+ReferenceAlignment: Pointer
 ReflowComments:  true
-SortIncludes: true
+RemoveBracesLLVM: false
+SeparateDefinitionBlocks: Leave
+ShortNamespaceLines: 1
+SortIncludes:    CaseSensitive
+SortJavaStaticImport: Before
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
-SpaceAfterTemplateKeyword: false
-# SpaceAroundPointerQualifiers: Default
+SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
-# SpaceBeforeCaseColon: true
-SpaceBeforeCpp11BracedList: true
+SpaceBeforeCaseColon: false
+SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
-SpaceBeforeInheritanceColon: true
-SpaceBeforeParens: ControlStatements
+SpaceBeforeInheritanceColon: false
+# The following options make the DSL macros behave
+#   more like the C++ keywords they correspond to.
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterForeachMacros: false
+  AfterFunctionDeclarationName: false
+  AfterFunctionDefinitionName: false
+  AfterIfMacros: true
+  AfterOverloadedOperator: false
+  BeforeNonEmptyParentheses: false
+SpaceAroundPointerQualifiers: Default
 SpaceBeforeRangeBasedForLoopColon: true
-SpaceBeforeSquareBrackets: false
-SpaceInEmptyParentheses: false
+SpaceInEmptyBlock: false
 SpacesBeforeTrailingComments: 1
-SpacesInAngles:  false
-SpacesInCStyleCastParentheses: false
-SpacesInConditionalStatement: false
-SpacesInContainerLiterals: true
-SpacesInCStyleCastParentheses: false
-SpacesInParentheses: false
-SpacesInSquareBrackets: false
-Standard: c++17
-TabWidth: 4
-UseTab: Never
-...
+SpacesInAngles:  Never
 
+SpacesInContainerLiterals: true
+## Godot TODO: We'll want to use a min of 1, but we need to see how to fix
+## our comment capitalization at the same time.
+SpacesInLineCommentPrefix:
+  Minimum:         0
+  Maximum:         -1
+SpacesInSquareBrackets: false
+SpaceBeforeSquareBrackets: false
+BitFieldColonSpacing: Both
+AlignArrayOfStructures: Right

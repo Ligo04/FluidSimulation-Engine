@@ -1,7 +1,10 @@
 set_xmakever("2.7.9")
 set_version("1.0.0")
 add_rules("mode.release", "mode.debug")
-
+set_toolchains("msvc")
+set_languages("c99", "cxx17")
+set_exceptions("none")
+set_encodings("utf-8")
 rule("dx_lib")
     on_load(function (target)
         target:add("syslinks","d3d11","dxgi","dxguid","D3DCompiler","winmm","kernel32","user32","gdi32","winspool","shell32","ole32","oleaut32","uuid","comdlg32","advapi32")
@@ -11,7 +14,6 @@ rule_end()
 
 rule("imguiini")
     after_build(function ()
-        print("after_build")
         imguiini_file=path.join(os.projectdir(),"imgui.ini")
         bin_path = path.join(os.projectdir(),"bin")
         if not os.isdir(bin_path) then
@@ -28,7 +30,6 @@ if is_arch("x64", "x86_64", "arm64") then
 	set_policy("build.ccache", true)
 	includes("xmake_func.lua")
     includes("thirdparty")
-    add_cxxflags("/utf-8")
 
     target("FluidSimulation-Engine")
         add_rules("imguiini")
